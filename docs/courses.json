@@ -47,7 +47,7 @@
           {
             "name": "include",
             "in": "query",
-            "description": "Comma seperated list of additional relations that should be fetched. Allowed: participant, courseStatus, courseLeader, courseSpeakers, downloads, costs, county, subcounty, mandant",
+            "description": "Comma seperated list of additional relations that should be fetched. Allowed: participant, courseStatus, courseLeader, courseSpeakers, courseImage, downloads, costs, county, subcounty, mandant",
             "required": false,
             "schema": {
               "type": "string"
@@ -167,6 +167,110 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CourseApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/courses/{Course}/costs": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "get all CourseCosts of a single Course",
+        "description": "With this API call you can get all costs of a course.",
+        "operationId": "showCourseCosts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseCostsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed"
+          },
+          "422": {
+            "description": "failed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "update the data of a CourseCosts",
+        "description": "With this API call you can update the costs of a course.",
+        "operationId": "updateCourseCosts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "This is the body of the request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CourseCosts"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseCosts"
+                  }
                 }
               }
             }
@@ -573,6 +677,211 @@
           }
         ]
       }
+    },
+    "/courses/{Course}/downloads": {
+      "get": {
+        "tags": [
+          "CourseDownloads"
+        ],
+        "summary": "get all CourseDownloads of a single Course",
+        "description": "With this API call you can get all downloads of a course.",
+        "operationId": "showCourseDownloads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseCostsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed"
+          },
+          "422": {
+            "description": "failed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CourseDownloads"
+        ],
+        "summary": "create a CourseDownloads for a course",
+        "description": "With this API call you can create a CourseDownloads of a course.",
+        "operationId": "createCourseDownloads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "This is the body of the request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CourseDownloadModel"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseDownloads"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed"
+          },
+          "422": {
+            "description": "failed"
+          }
+        }
+      }
+    },
+    "/courses/{Course}/downloads/{CourseDownload}": {
+      "put": {
+        "tags": [
+          "CourseDownloads"
+        ],
+        "summary": "update a CourseDownloads for a course",
+        "description": "With this API call you can update a CourseDownloads of a course.",
+        "operationId": "updateCourseDownloads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          },
+          {
+            "in": "path",
+            "name": "CourseDownload",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The CourseDownload unique identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "This is the body of the request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CourseDownloadModel"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseDownloads"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "failed"
+          },
+          "422": {
+            "description": "failed"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CourseDownloads"
+        ],
+        "summary": "delete a CourseDownloads for a course",
+        "description": "With this API call you can delete a CourseDownloads of a course.",
+        "operationId": "deleteCourseDownloads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Course",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The Course unique identifier"
+          },
+          {
+            "in": "path",
+            "name": "CourseDownload",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The CourseDownload unique identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful"
+          },
+          "404": {
+            "description": "failed"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
   },
   "servers": [
@@ -694,7 +1003,7 @@
             "type": "string",
             "example": "Dieses Seminar dient als Platzhalter"
           },
-          "SeminarbeschreibungDetail2": {
+          "SeminarbeschreibungDetail": {
             "type": "string",
             "example": null
           },
@@ -1148,8 +1457,48 @@
           }
         }
       },
+      "CourseDownloadModel": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "file_extension"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Datenschutz-und-Informationen.pdf"
+          },
+          "description": {
+            "type": "string",
+            "example": "Datenschutzerklärung und Informationen zum Seminar"
+          },
+          "content": {
+            "type": "string",
+            "description": "The full content of a file you want to upload to Phoenix II. Required if no path is set"
+          },
+          "file_extension": {
+            "type": "string",
+            "example": "pdf",
+            "description": "Set the file extension. Allowed types: csv|doc|docx|jpeg|jpg|odt|pdf|png|ppt|pptx|vcf|xls|xlsx. Required if content is set."
+          },
+          "file_path": {
+            "type": "string",
+            "example": "https://yourdomain.tld/Datenschutz-und-Informationen.pdf",
+            "description": "A path to a remote file to upload to Phoenix II. Required if no content is set"
+          }
+        }
+      },
       "CourseCosts": {
         "type": "object",
+        "required": [
+          "description",
+          "costs",
+          "cost_type",
+          "member_id",
+          "show_online",
+          "cost_none_members"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -1167,12 +1516,12 @@
           "cost_type": {
             "type": "integer",
             "example": 1,
-            "description": "The type of this costs (Normalpreis, Sonderpreis, ...)"
+            "description": "The type of this costs. (Default configuration is: 1|Normalpreis, 2|Sonderpreis, 3|weitere Leistungen)"
           },
           "member_id": {
             "type": "integer",
             "example": 1,
-            "description": "The id of the clubs membership"
+            "description": "The id of the clubs membership. (Default configuration is: 1|Vollmitglied, 2|Nichtmitglied)"
           },
           "show_online": {
             "type": "boolean",
@@ -1235,6 +1584,20 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CourseModel"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "CourseCostsApiResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseCosts"
             }
           },
           "meta": {
