@@ -839,6 +839,10 @@ components:
           format: uuid
           example: "7d342a44-7b0c-42d3-8900-13dd624eae88"
           description: "The unique id of the person"
+        number:
+          type: integer
+          format: int32
+          example: 101
         firstname:
           type: string
           format: uuid
