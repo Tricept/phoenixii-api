@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  description: 'This is a simple description for the PhoenixII Disciplines-API.'
+  version: 1.0.0
+  title: Disciplines API
+  contact:
+    email: phoenix-api@it4sport.de
+tags: 
+  - name: Disciplines
+paths:
+  /club/{GUID}/discipline:
+    get:
+      parameters: 
+        - name: "GUID"
+          in: path
+          schema:
+            format: uuid
+            type: "string" 
+          required: true
+        - in: "header"
+          name: "X-Auth-Token"
+          schema:
+            format: uuid
+            type: "string" 
+          required: true  
+      tags:
+        - Disciplines
+      responses: 
+        '200': 
+          description: 'Successfull'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/discipline_response'
+components:
+  schemas:
+    discipline_response:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/data'
+        links:
+          $ref: '#/components/schemas/links'
+        meta:
+          $ref: '#/components/schemas/meta'
+        
+    data:
+      type: array
+      items:
+        type: object
+        properties:
+          vereins_nr:
+            type: integer
+            format: int32
+            example: 836
+            description: number of the club
+          u_verein:
+            type: string
+            format: uuid
+            example: ABF581B1-0F22-4F63-A32F-1E899C694282
+            description: unique identifier for club
+          discipline_nr:
+            type: integer
+            format: int32
+            example: 1
+            description: number of discipline
+          discipline_name: 
+            type: string
+            example: Alpin
+            description: name of the discipline
+          discipline_short:
+            type: string
+            example: AL
+            description: abbreviation of the discipline
+    links:
+      type: object
+      properties:
+        first:
+          type: string
+          example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline?page=1
+          description: link to the first page 
+        last:
+          type: string
+          example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline?page=1
+          description: link to the last page
+        prev:
+          type: string
+          example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline?page=1
+          description: link to the previous page
+        next:
+          type: string
+          example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline?page=1
+          description: link to the next page
+    meta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+          description: number of current page
+        from:
+          type: integer
+          example: 1
+          description: number of total pages
+        last_page:
+          type: integer
+          example: 1
+          description: number of last page
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline?page=1
+                description: url link
+              label: 
+                type: string
+                example: Zurück
+                description: name of the label
+              active:
+                type: boolean
+                example: false
+                description: activity state as boolean
+        path:
+          type: string
+          example: https://testssv.it4sport.de/api/club/ABF581B1-0F22-4F63-A32F-1E899C694282/discipline
+          description: url of the path
+        per_page:
+          type: integer
+          example: 25
+          description: amount of results per page
+        to:
+          type: integer
+          example: 2
+        total:
+          type: integer
+          example: 2
+          description: total count

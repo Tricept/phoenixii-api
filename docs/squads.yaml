@@ -1,0 +1,301 @@
+openapi: 3.0.0
+info:
+  description: 'This is a simple description for the PhoenixII Squads-API. SquadIDs have the following meaning: 11 => OK, 12 => PK, 13 => EK, 14 => NK 1 U23, 15 => NK 1 U23, 16 => NK 2, 72 => Berglauf, 73 => Ultramarathon 100 km, 74 => Ultramarathn 24 h, 83 => Nationalmannschaft (2022).'
+  version: 1.0.0
+  title: Squads API
+  contact:
+    email: phoenix-api@it4sport.de
+tags:
+  - name: Kader
+    description: act with the persons search API.
+    
+paths: 
+  /kader:
+    get:
+      tags:
+        - Kader
+      parameters:
+        - in: "header"
+          name: "X-Auth-Token"
+          schema:
+            format: uuid
+            type: "string" 
+          required: true  
+      responses: 
+        '200':
+          description: 'successfull'
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Squads'
+
+components:
+  schemas:
+    Squads:
+      type: object
+      properties:
+        requests:
+          $ref: '#/components/schemas/requests'
+        person:
+          $ref: '#/components/schemas/person'
+    requests:
+      type: object
+      properties:
+        created:
+          type: string
+          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}$
+          example: 2022-11-15 22:11:08
+          description: date and time of request creation
+        version:
+          type: string
+          pattern: ^[1-9][0-9]*.[0-9]+$
+          example: 1.0
+          description: version of the request
+        found_data:
+          type: integer
+          format: int32
+          example: 692
+          description: amount of data found
+        filename:
+          type: string
+          description: name of file
+    person:
+      type: array
+      items:
+        type: object
+        properties:
+          id: 
+            type: string
+            format: uuid
+            example: 93EAADDE-F89A-46C5-8BFC-2C9658B5F1AB
+            description: The ID of the person
+          lastname:
+            type: string
+            example: Mustermann
+            description: The lastname of the person
+          fistname: 
+            type: string
+            example: Max
+            description: The firstname of the person
+          gender:
+            type: string
+            enum:
+              - M
+              - F
+            example: M
+            description: The gender of the person
+          date_of_birth:
+            type: string
+            format: date
+            example: 2000-08-21
+            description: The date of birth of the person
+          first_nationality:
+            type: string
+            example: GER
+            description: The first nationality of the person
+          second_nationality:
+            type: string
+            example: ENG
+            description: The second nationality of the person
+          current_club:
+            type: object
+            properties:
+              licenseID:
+                type: string 
+                xml:
+                  attribute: true
+                pattern: (BA|BY|BE|BB|BR|BS|HH|HE|MV|NI|NO|PF|RH|RL|SL|SN|ST|SH|TH|WE|WÜ)[0-9]{7}
+                example: NI1234567
+                description: The license ID of the current club of the person
+              club_name:
+                type: string
+                xml:
+                  attribute: true
+                example: Hannoverscher Sportverein von 1896 e.V.
+                description: The name of the current club of the person
+              club_id:
+                type: string
+                xml:
+                  attribute: true
+                pattern: (BA|BY|BE|BB|BR|BS|HH|HE|MV|NI|NO|PF|RH|RL|SL|SN|ST|SH|TH|WE|WÜ)[0-9]{7}
+                example: NI7654321
+                description: The club ID of the current club
+            description: The current club of the person
+          past_club:
+            type: object
+            properties:
+              licenseID:
+                type: string
+                xml:
+                  attribute: true
+                pattern: (BA|BY|BE|BB|BR|BS|HH|HE|MV|NI|NO|PF|RH|RL|SL|SN|ST|SH|TH|WE|WÜ)[0-9]{7}
+                example: NI1234567
+                description: The license ID of the past club of the person
+              club_name:
+                type: string
+                xml:
+                  attribute: true
+                example: Hannoverscher Sportverein von 1896 e.V.
+                description: The name of the past club of the person
+              club_id:
+                type: string
+                xml:
+                  attribute: true
+                pattern: (BA|BY|BE|BB|BR|BS|HH|HE|MV|NI|NO|PF|RH|RL|SL|SN|ST|SH|TH|WE|WÜ)[0-9]{7}
+                example: NI7654321
+                description: The club ID of the past club
+            description: The past club of the person
+          squad:
+            type: object
+            properties:
+              date_start:
+                type: string
+                xml:
+                  attribute: true
+                format: date
+                example: 2022-01-01
+                description: start date 
+              date_end:
+                type: string
+                xml:
+                  attribute: true
+                format: date
+                example: 2023-12-31
+                description: end date
+              updated:
+                type: string
+                xml:
+                  attribute: true
+                pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}$
+                description: date and time of last data update
+              squad_id:
+                type: integer
+                xml:
+                  attribute: true
+                format: int32
+                example: 13
+                description: id of the squad
+              squad_group_id: 
+                type: integer
+                xml:
+                  attribute: true
+                format: int32
+                example: 22
+                description: id of the group of the squad
+              person_id:
+                type: string
+                format: uuid
+                example: 93EAADDE-F89A-46C5-8BFC-2C9658B5F1AB
+                description: The ID of the person in the squad
+              discipline: 
+                type: string
+                enum:
+                  - 100 m
+                  - 200 m
+                  - 400 m
+                  - 800 m
+                  - 1500 m
+                  - Langstrecke
+                  - 110 m Hürden
+                  - 100 m Hürden
+                  - 3000 m Hindernis
+                  - 20 km Gehen
+                  - 35 km Gehen
+                  - Hochsprung
+                  - Stabhochsprung
+                  - Weitsprung
+                  - Dreisprung
+                  - Kugelstossen
+                  - Diskuswurf
+                  - Hammerwurf
+                  - Speerwurf
+                  - Zehnkampf
+                  - Siebenkampf
+                  - 400 m Hürden
+                  - Marathon
+                  - Ohne
+                  - 4x100 m
+                  - 4x400 m
+                  - '* keine Disziplin'
+                  - 10000 m
+                  - 5000 m
+                  - Sprint
+                example: Sprint
+                description: The discipline of the person
+              #is_relay:                 #empty for every person
+              #is_active:                #empty for every person
+              #signature_address:        #empty for every person
+              trainer_first: 
+                type: string
+                example: Max Mustermann
+                description: The first trainer of the person
+              trainer_active: 
+                type: string
+                example: Max Mustermann
+                description: The active trainer of the person
+              palmares:
+                type: string
+                example: Deutscher Meister 2020 (Zehnkampf)&#13;
+                description: List of achievements of the person
+              homepage:
+                type: string
+                example: https://homepage.de
+                description: The homepage of the person
+              facebook:
+                type: string
+                example: https://de-de.facebook.com/MaxMustermann
+                description: The facebook site of the person
+              twitter:
+                type: string
+                example: https://de-de.twitter.com/MaxMustermann
+                description: The twitter site of the person
+              action_file:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
+                    example: 12345
+                    description: action file id
+                  name:
+                    type: string
+                    pattern: .jpg$
+                    example: 111222_Action.jpg
+                    description: Name of the action file
+                  text:
+                    type: string
+                    description: The text of the action file
+                  photographer:
+                    type: string
+                    example: Max Mustermann
+                    description: The name of the photographer
+                  size:
+                    type: integer
+                    format: int32
+                    example: 29198
+                    description: The size of the action file
+              portrait_file:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
+                    example: 12345
+                    description: portrait file id
+                  name:
+                    type: string
+                    pattern: .jpg$
+                    example: 111222_Portrait.jpg
+                    description: Name of the portrait file
+                  text:
+                    type: string
+                    description: The text of the portrait file
+                  photographer:
+                    type: string
+                    example: Max Mustermann
+                    description: The name of the photographer
+                  size:
+                    type: integer
+                    format: int32
+                    example: 29198
+                    description: The size of the portrait file
