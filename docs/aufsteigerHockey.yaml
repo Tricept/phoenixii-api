@@ -292,12 +292,12 @@ servers:
     variables:
       client:
         description: This is the client you will call the API
-        default: test
+        default: testoehv
         enum:
+          - testwebinar
+          - oehv
           - testoehv
           - testingoehv
-          - devoehv
-          - oehv
 components:
   securitySchemes:
     api_key:

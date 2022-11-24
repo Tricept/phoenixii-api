@@ -443,12 +443,12 @@
       "variables": {
         "client": {
           "description": "This is the client you will call the API",
-          "default": "test",
+          "default": "testoehv",
           "enum": [
+            "testwebinar",
+            "oehv",
             "testoehv",
-            "testingoehv",
-            "devoehv",
-            "oehv"
+            "testingoehv"
           ]
         }
       }

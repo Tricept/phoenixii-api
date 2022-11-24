@@ -1005,7 +1005,8 @@
           },
           "SeminarbeschreibungDetail": {
             "type": "string",
-            "example": null
+            "example": null,
+            "maxLength": 1000000
           },
           "Leistungen": {
             "type": "string",
@@ -1093,6 +1094,10 @@
           "MindestalterLgBeginn": {
             "type": "boolean",
             "example": true
+          },
+          "MasNr": {
+            "type": "string",
+            "example": "2022651BC"
           },
           "VereinTnPruefungsNr": {
             "type": "integer",
