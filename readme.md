@@ -1,5 +1,5 @@
 
-# [DEV] Phoenix II API Documentation
+# [DEV] Phoenix II - API Documentation
 
 ## Introduction
 This is the official API documentation of Phoenix II.
