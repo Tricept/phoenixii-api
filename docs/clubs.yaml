@@ -637,15 +637,27 @@ components:
     ChangeInvoiceAddress:
       type: object
       required:
+        - formOfAddress
+        - firstname
+        - lastname
         - address
+        - email
       properties:
+        company:
+          type: string
+          example: "Die Sportfirma"
+          description: name of the company
         formOfAddress:
           type: string
+          nullable: true
           enum:
             - "Herr"
             - "Frau"
-            - "Divers"
             - "Geschäftsstelle"
+            - "Firma"
+            - null
+            - "An"
+            - "Divers"
           example: "Herr"
           description: form of address of person
         firstname:
@@ -662,6 +674,10 @@ components:
           description: title of person
         address:
           type: object
+          required:
+            - street
+            - postcode
+            - city
           description: Updated invoice address
           properties:
             street:
@@ -689,7 +705,8 @@ components:
               description: longitude of place
             country:
               type: string
-              example: germany
+              pattern: '^[A-Z]{3}$'
+              example: "GER"
               description: country of the place
 
         email:
@@ -701,15 +718,27 @@ components:
     ChangePostAddress:
       type: object
       required:
+        - formOfAddress
+        - firstname
+        - lastname
         - address
+        - email
       properties:
+        company:
+          type: string
+          example: "Die Sportfirma"
+          description: name of the company
         formOfAddress:
           type: string
+          nullable: true
           enum:
             - "Herr"
             - "Frau"
-            - "Divers"
             - "Geschäftsstelle"
+            - "Firma"
+            - null
+            - "An"
+            - "Divers"
           example: "Herr"
           description: form of address of person
         firstname:
@@ -726,7 +755,11 @@ components:
           description: title of person
         address:
           type: object
-          description: Updated invoice address
+          required:
+            - street
+            - postcode
+            - city
+          description: Updated post address
           properties:
             street:
               type: string
@@ -736,7 +769,7 @@ components:
               type: string
               maxLength: 10
               example: "55555"
-              description: Updated postal code of the place of the club
+              description: Updated postal code of the city of the club
             city:
               type: string
               example: "Stuttgart"
@@ -753,8 +786,10 @@ components:
               description: longitude of place
             country:
               type: string
-              example: germany
+              pattern: '^[A-Z]{3}$'
+              example: "GER"
               description: country of the place
+
         email:
           type: string
           format: email

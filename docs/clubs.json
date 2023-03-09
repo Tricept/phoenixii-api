@@ -847,16 +847,29 @@
       "ChangeInvoiceAddress": {
         "type": "object",
         "required": [
-          "address"
+          "formOfAddress",
+          "firstname",
+          "lastname",
+          "address",
+          "email"
         ],
         "properties": {
+          "company": {
+            "type": "string",
+            "example": "Die Sportfirma",
+            "description": "name of the company"
+          },
           "formOfAddress": {
             "type": "string",
+            "nullable": true,
             "enum": [
               "Herr",
               "Frau",
-              "Divers",
-              "Geschäftsstelle"
+              "Geschäftsstelle",
+              "Firma",
+              null,
+              "An",
+              "Divers"
             ],
             "example": "Herr",
             "description": "form of address of person"
@@ -878,6 +891,11 @@
           },
           "address": {
             "type": "object",
+            "required": [
+              "street",
+              "postcode",
+              "city"
+            ],
             "description": "Updated invoice address",
             "properties": {
               "street": {
@@ -910,7 +928,8 @@
               },
               "country": {
                 "type": "string",
-                "example": "germany",
+                "pattern": "^[A-Z]{3}$",
+                "example": "GER",
                 "description": "country of the place"
               }
             }
@@ -926,16 +945,28 @@
       "ChangePostAddress": {
         "type": "object",
         "required": [
-          "address"
+          "formOfAddress",
+          "firstname",
+          "lastname",
+          "address",
+          "email"
         ],
         "properties": {
+          "company": {
+            "type": "string",
+            "example": "Die Sportfirma",
+            "description": "name of the company"
+          },
           "formOfAddress": {
             "type": "string",
             "enum": [
               "Herr",
               "Frau",
-              "Divers",
-              "Geschäftsstelle"
+              "Geschäftsstelle",
+              "Firma",
+              null,
+              "An",
+              "Divers"
             ],
             "example": "Herr",
             "description": "form of address of person"
@@ -957,7 +988,12 @@
           },
           "address": {
             "type": "object",
-            "description": "Updated invoice address",
+            "required": [
+              "street",
+              "postcode",
+              "city"
+            ],
+            "description": "Updated post address",
             "properties": {
               "street": {
                 "type": "string",
@@ -968,7 +1004,7 @@
                 "type": "string",
                 "maxLength": 10,
                 "example": "55555",
-                "description": "Updated postal code of the place of the club"
+                "description": "Updated postal code of the city of the club"
               },
               "city": {
                 "type": "string",
@@ -989,7 +1025,8 @@
               },
               "country": {
                 "type": "string",
-                "example": "germany",
+                "pattern": "^[A-Z]{3}$",
+                "example": "GER",
                 "description": "country of the place"
               }
             }
