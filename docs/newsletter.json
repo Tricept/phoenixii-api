@@ -222,7 +222,7 @@
           },
           "write_to": {
             "type": "string",
-            "example": "Sehr geehrte Damen und Herren",
+            "example": "Guten Tag Damen und Herren",
             "description": "First-Line / Anschreiben of the newsletter edition"
           },
           "sender_name": {
@@ -296,7 +296,7 @@
           },
           "salutation": {
             "type": "string",
-            "example": "Sehr geehrter Herr",
+            "example": "Guten Tag Herr",
             "description": "The subscribers full salutation"
           },
           "email": {
