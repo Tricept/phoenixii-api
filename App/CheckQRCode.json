@@ -1,0 +1,95 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a simple description for the App Check QRCode API.",
+    "version": "1.0.0",
+    "title": "App Check QRCode API",
+    "contact": {
+      "email": "phoenix-api@it4sport.de"
+    }
+  },
+  "tags": [
+    {
+      "name": "Check QRCode"
+    }
+  ],
+  "paths": {
+    "/check-qr-code/{uuid}": {
+      "get": {
+        "tags": [
+          "Check QRCode"
+        ],
+        "summary": "reading QR-Code",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "uuid of the person",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "startpass"
+              ]
+            }
+          },
+          {
+            "name": "fromApp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successfull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckQRCode"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid uuid or type not implemented or missing"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://dtu.it4sport.de/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "CheckQRCode": {
+        "type": "object",
+        "properties": {
+          "isValid": {
+            "type": "boolean",
+            "example": true,
+            "description": "isValid is true if code is valid"
+          },
+          "passbildCode": {
+            "type": "string",
+            "example": "data:image/jpg;base64,...",
+            "description": "pass image coded in base64"
+          }
+        }
+      }
+    }
+  }
+}

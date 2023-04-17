@@ -382,14 +382,6 @@ components:
           format: "date-time"
           example: "2020-01-01T0:00:00+01:00"
           description: "The clubs leaving date"
-        longitude:
-          type: number
-          format: float
-          example: 9.172345
-        latitude:
-          type: number
-          format: float
-          example: 48.172345
         founding_year:
           type: string
           example: "2020"
@@ -402,6 +394,14 @@ components:
           type: string
           example: "https://tsv-musterhausen.de"
           description: "The clubs webaddress"
+        longitude:
+          type: number
+          format: float
+          example: 9.172345
+        latitude:
+          type: number
+          format: float
+          example: 48.172345
         social:
           type: array
           items:

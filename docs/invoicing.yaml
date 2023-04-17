@@ -1,303 +1,326 @@
-swagger: "2.0"
+openapi: 3.0.1
 info:
-  description: "This is a simple description for invoices via API in Phoenix II. In the URL is the parameter {client} needed, this will call the right client for the api. This parameter will be given with API key."
-  version: "1.0.5"
-  title: "Import Invoicing"
+  title: Import Invoicing
+  description: This is a simple description for invoices via API in Phoenix II. In
+    the URL is the parameter {client} needed, this will call the right client for
+    the api. This parameter will be given with API key.
   contact:
-    email: "phoenix-api@it4sport.de"
-host: "{client}.it4sport.de"
-basePath: "/api/invoicing"
+    email: phoenix-api@it4sport.de
+  version: 1.0.6
+servers:
+  - url: https://{client}.it4sport.de/api/invoicing
 tags:
-  - name: "import"
-    description: "import invoice for persons"
-schemes:
-  - "https"
+  - name: import
+    description: import invoice for persons
 paths:
   /import:
     post:
       tags:
-        - "import"
-      summary: "import new invoice infos"
-      description: ""
-      operationId: "addInvoicing"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-
+        - import
+      summary: import new invoice infos
+      operationId: addInvoicing
       parameters:
-        - name: "X-Auth-Token"
-          in: "header"
-          description: ""
-          format: uuid
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "List of UnitFee object"
+        - name: X-Auth-Token
+          in: header
           required: true
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/UnitFee"
+            type: string
+            format: uuid
+      requestBody:
+        description: List of UnitFee object
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UnitFee'
+        required: true
       responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        "400":
-          description: "Invalid ID supplied"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        "404":
-          description: "Id not found"
-        "405":
-          description: "Validation exception"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        404:
+          description: Id not found
+          content: {}
+        405:
+          description: Validation exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
       security:
         - api_key: []
+      x-codegen-request-body-name: body
   /processes:
     get:
-      tags: ["processes"]
-      summary: "shows all possible processes"
-      description: ""
-      operationId: "processes"
-      produces:
-        - "application/json"
+      tags:
+        - processes
+      summary: shows all possible processes
+      operationId: processes
       parameters:
-        - name: "X-Auth-Token"
-          in: "header"
-          description: ""
-          format: uuid
+        - name: X-Auth-Token
+          in: header
           required: true
-          type: "string"
+          schema:
+            type: string
+            format: uuid
       responses:
-        "200":
-          description: "successful operation; Returns Process as array"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Process"
-        "400":
-          description: "Invalid ID supplied"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        "404":
-          description: "Id not found"
+        200:
+          description: successful operation; Returns Process as array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Process'
+        400:
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        404:
+          description: Id not found
+          content: {}
   /costcenters:
     get:
-      tags: ["costcenter"]
-      summary: "shows all possible costcenters"
-      description: ""
-      operationId: "costcenters"
-      produces:
-        - "application/json"
+      tags:
+        - costcenter
+      summary: shows all possible costcenters
+      operationId: costcenters
       parameters:
-        - name: "X-Auth-Token"
-          in: "header"
-          description: ""
-          format: uuid
+        - name: X-Auth-Token
+          in: header
           required: true
-          type: "string"
+          schema:
+            type: string
+            format: uuid
       responses:
-        "200":
-          description: "successful operation; Returns Costcenter as array"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Costcenter"
-        "400":
-          description: "Invalid ID supplied"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        "404":
-          description: "Id not found"
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "X-Auth-Token"
-    in: "header"
-definitions:
-  UnitFee:
-    type: "object"
-    required:
-      - "recipientId"
-      - "recipientType"
-      - "process"
-      - "date"
-      - "credit"
-      - "deliveryNote"
-      - "amount"
-    properties:
-      recipientId:
-        type: "string"
-        example: 0
-        pattern: '^(\D{2,})[0-9]{7}$|^[0-9]{1,10}$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
-        description: "Phoenix II Person Guid Class 4, Phoenix II Adress, Club, County, District Number. If the recipient needs to be created this value needs to be 0"
-      recipientType:
-        type: "string"
-        enum:
-          - "person"
-          - "club"
-          - "county"
-          - "district"
-          - "state"
-      create:
-        type: "object"
-        description: "is needed to create a new person, if recipientId = 0"
-        properties:
-          id:
-            type: "integer"
-            format: "int32"
-            example: 150
-            description: "If this is set, the API will create the user and returns this ID with the Phoenix ID mapped."
-          institution:
-            type: "string"
-            example: "Company GmbH"
-          department:
-            type: "string"
-            example: "Accounting"
-          lastname:
-            type: "string"
-            example: "Doe"
-          firstname:
-            type: "string"
-            example: "John"
-          birthdate:
-            type: "string"
-            format: "date"
-            example: "2000-01-01"
-          title:
-            type: "string"
-            example: "Dr."
-          sex:
-            type: "string"
-            description: "org for organisations"
-            enum:
-              - "male"
-              - "female"
-              - "org"
-          street:
-            type: "string"
-          country:
-            type: "string"
-            example: "D"
-            description: "Country code of the person's address. D = Germany"
-          postcode:
-            type: "string"
-            example: "70736"
-          city:
-            type: "string"
-            example: "Fellbach"
-          email:
-            type: "string"
-            example: "test@example.de"
-          iban:
-            type: "string"
-            example: "DE12500105170648489890"
-          directDebit:
-            example: true
-            type: "boolean"
-      process:
-        type: "string"
-        description: ""
-        example: "BescheidVb"
-      costs:
-        type: "number"
-        format: "float"
-        example: 0.50
-        description: "Basic prices per item, for an credit this still needs to be positive. Cost in EUR."
-      date:
-        type: "string"
-        format: "date"
-        example: "2020-01-01"
-        description: "Format RFC 3339. Just displays User when the acticle is booked or is from. The Date is not shown on the Invoice."
-      additionalText:
-        type: "string"
-        maxLength: 150
-        example: "Berlin Event 2020"
-        description: "This Text gets added to an item on an invoice"
-      credit:
-        example: false
-        type: "boolean"
-        default: false
-        description: "on true it won't create a invoice therefore a credit"
-      costCenter:
-        type: "string"
-        description: "Contains the indicator whether the fee rate should be assigned to a cost center and, if so, whether the association cost center to which the person is assigned. It is also possible to enter a real cost center number."
-      deliveryNote:
-        type: "boolean"
-        default: false
-        description: "creates a delvivery note to an invoice"
-      amount:
-        type: "integer"
-        default: 1
-        format: "float"
-        example: 150
-      importId:
-        type: "integer"
-        default: 0
-        format: "int32"
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-      data:
-        type: "array"
-        items:
-          type: "object"
-      ids_map:
-        type: "object"
-        description: "This is just set, if new Persons are created with id attribute."
-        properties:
-          id:
-            type: integer
-          recipientId:
-            type: integer
-  Process:
-    type: "object"
-    properties:
-      process:
-        type: "string"
-        example: "Finisher"
-        description: "Process for import invoicing"
-      articleNr:
-        type: "integer"
-        format: "int32"
-        example: 444
-      articleName:
-        type: "string"
-        example: "Finisher U18 und älter"
-      price:
-        type: "integer"
-        format: "float"
-        example: 3.5
-  Costcenter:
-    type: "object"
-    properties:
-      process:
-        type: "integer"
-        example: 99
-        description: "Phoenix II ID for the costcenter"
-      costcenterNrImport:
-        type: "string"
-        example: "K99"
-        description: "Phoenix II ID import"
-      costcenterNrExtern:
-        type: "string"
-        example: "K-001458"
-        description: "User Number"
-      costcenterGroup:
-        type: "integer"
-        example: 1
-      Description:
-        type: "string"
-        example: "Default costcenter"
-        description: "Definition for costcenter"
+        200:
+          description: successful operation; Returns Costcenter as array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Costcenter'
+        400:
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        404:
+          description: Id not found
+          content: {}
+components:
+  schemas:
+    UnitFee:
+      required:
+        - amount
+        - credit
+        - date
+        - deliveryNote
+        - process
+        - recipientId
+        - recipientType
+      type: object
+      properties:
+        recipientId:
+          pattern: ^(\D{2,})[0-9]{7}$|^[0-9]{1,10}$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+          type: string
+          description: Phoenix II Person Guid Class 4, Phoenix II Adress, Club, County,
+            District Number. If the recipient needs to be created this value needs
+            to be 0
+          example: "0"
+        recipientType:
+          type: string
+          enum:
+            - person
+            - club
+            - county
+            - district
+            - state
+        create:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: If this is set, the API will create the user and returns
+                this ID with the Phoenix ID mapped.
+              format: int32
+              example: 150
+            institution:
+              type: string
+              example: Company GmbH
+            department:
+              type: string
+              example: Accounting
+            lastname:
+              type: string
+              example: Doe
+            firstname:
+              type: string
+              example: John
+            birthdate:
+              type: string
+              format: date
+              example: 2000-01-01
+            title:
+              type: string
+              example: Dr.
+            sex:
+              type: string
+              description: org for organisations
+              enum:
+                - male
+                - female
+                - org
+            street:
+              type: string
+            country:
+              type: string
+              description: Country code of the person's address. D = Germany
+              example: D
+            postcode:
+              type: string
+              example: "70736"
+            city:
+              type: string
+              example: Fellbach
+            email:
+              type: string
+              example: test@example.de
+            iban:
+              type: string
+              example: DE12500105170648489890
+            directDebit:
+              type: boolean
+              example: true
+          description: is needed to create a new person, if recipientId = 0
+        process:
+          type: string
+          description: ""
+          example: BescheidVb
+        costs:
+          type: number
+          description: Basic prices per item, for an credit this still needs to be
+            positive. Cost in EUR.
+          format: float
+          example: 0.5
+        date:
+          type: string
+          description: Format RFC 3339. Just displays User when the acticle is booked
+            or is from. The Date is not shown on the Invoice.
+          format: date
+          example: 2020-01-01
+        additionalText:
+          maxLength: 150
+          type: string
+          description: This Text gets added to an item on an invoice
+          example: Berlin Event 2020
+        credit:
+          type: boolean
+          description: on true it won't create a invoice therefore a credit
+          example: false
+          default: false
+        costCenter:
+          type: string
+          description: Contains the indicator whether the fee rate should be assigned
+            to a cost center and, if so, whether the association cost center to which
+            the person is assigned. It is also possible to enter a real cost center
+            number.
+        deliveryNote:
+          type: boolean
+          description: creates a delvivery note to an invoice
+          default: false
+        amount:
+          type: integer
+          format: float
+          example: 150
+        importId:
+          type: integer
+          format: int32
+          default: 0
+        groupText:
+          type: string
+          description: "Provide the invoice header text for the invoices. Fee rates
+            with the same invoice header text will be grouped."
+          example: ""
+          default: ""
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties: {}
+        ids_map:
+          type: object
+          properties:
+            id:
+              type: integer
+            recipientId:
+              type: integer
+          description: This is just set, if new Persons are created with id attribute.
+    Process:
+      type: object
+      properties:
+        process:
+          type: string
+          description: Process for import invoicing
+          example: Finisher
+        articleNr:
+          type: integer
+          format: int32
+          example: 444
+        articleName:
+          type: string
+          example: Finisher U18 und älter
+        price:
+          type: integer
+          format: float
+    Costcenter:
+      type: object
+      properties:
+        process:
+          type: integer
+          description: Phoenix II ID for the costcenter
+          example: 99
+        costcenterNrImport:
+          type: string
+          description: Phoenix II ID import
+          example: K99
+        costcenterNrExtern:
+          type: string
+          description: User Number
+          example: K-001458
+        costcenterGroup:
+          type: integer
+          example: 1
+        Description:
+          type: string
+          description: Definition for costcenter
+          example: Default costcenter
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-Auth-Token
+      in: header
