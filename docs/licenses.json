@@ -1,0 +1,215 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a simple description for the PhoenixII Licenses-API. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.",
+    "version": "1.0",
+    "title": "Licenses API",
+    "contact": {
+      "email": "phoenix-api@it4sport.de"
+    }
+  },
+  "tags": [
+    {
+      "name": "licenses",
+      "description": "act with the licenses API."
+    }
+  ],
+  "paths": {
+    "/licenses/types": {
+      "get": {
+        "tags": [
+          "types"
+        ],
+        "summary": "show all LicenseType for a client",
+        "description": "With this API call you will get all LicenseType belong to your client.",
+        "operationId": "showLicenseTypes",
+        "parameters": [
+          {
+            "name": "include",
+            "in": "query",
+            "description": "Comma seperated list of additional relations that should be fetched. Allowed: discipline, license_scope",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseTypeApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{env}api.it4sport.de/{client}/api/",
+      "variables": {
+        "env": {
+          "description": "This is the environment you will call the API",
+          "default": "test",
+          "enum": [
+            "test",
+            "testing",
+            "dev"
+          ]
+        },
+        "client": {
+          "description": "This is the client you will call the API",
+          "default": "webinar"
+        }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-Auth-Token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "LicenseTypeApiResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LicenseType"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "LicenseType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "example": 101
+          },
+          "name": {
+            "type": "string",
+            "example": "Trainer C Breitensport"
+          },
+          "short": {
+            "type": "string",
+            "example": "TC-B"
+          },
+          "license_identifier": {
+            "type": "string",
+            "example": "TCB"
+          },
+          "print_name": {
+            "type": "string"
+          },
+          "learning_units": {
+            "type": "number",
+            "format": "float"
+          },
+          "learning_units_interdisciplinary": {
+            "type": "number",
+            "format": "float"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-12-24T00:00:00+01:00"
+          },
+          "license_scope": {
+            "$ref": "#/components/schemas/LicenseScope"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          }
+        }
+      },
+      "LicenseScope": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "example": 101
+          },
+          "name": {
+            "type": "string",
+            "example": "Trainer"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-12-24T00:00:00+01:00"
+          }
+        }
+      },
+      "Discipline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          },
+          "name": {
+            "type": "string",
+            "example": "Schwimmen"
+          },
+          "short_name": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "min_age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_age": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "integer"
+          },
+          "dev": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
