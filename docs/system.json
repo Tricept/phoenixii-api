@@ -1,0 +1,234 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a simple description for the PhoenixII System-API. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.",
+    "version": "1.0",
+    "title": "System API",
+    "contact": {
+      "email": "phoenix-api@it4sport.de"
+    }
+  },
+  "tags": [
+    {
+      "name": "system",
+      "description": "act with the system API."
+    }
+  ],
+  "paths": {
+    "/system/associations": {
+      "get": {
+        "tags": [
+          "associations"
+        ],
+        "summary": "show all Association for a client",
+        "description": "With this API call you will get all Association belong to your client.",
+        "operationId": "showAssociations",
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssociationApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/system/association-contacts": {
+      "get": {
+        "tags": [
+          "contacts"
+        ],
+        "summary": "show all contactAssociation for a client",
+        "description": "With this API call you will get all contactAssociation belong to your client.",
+        "operationId": "showContactAssociations",
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactAssociationApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{env}api.it4sport.de/{client}/api/",
+      "variables": {
+        "env": {
+          "description": "This is the environment you will call the API",
+          "default": "test",
+          "enum": [
+            "test",
+            "testing",
+            "dev"
+          ]
+        },
+        "client": {
+          "description": "This is the client you will call the API",
+          "default": "webinar"
+        }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-Auth-Token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "AssociationObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32",
+            "example": 21,
+            "description": "Level 20 is the system association. Level 21/22 are districts/counties."
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "example": 101
+          },
+          "name": {
+            "type": "string",
+            "example": "Bezirk Nord"
+          },
+          "short_name": {
+            "type": "string",
+            "example": "Nord"
+          },
+          "abbreviation": {
+            "type": "string",
+            "example": "N"
+          }
+        }
+      },
+      "Association": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AssociationObject"
+          }
+        ],
+        "properties": {
+          "child_associations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChildAssociation"
+            }
+          }
+        }
+      },
+      "ChildAssociation": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AssociationObject"
+          }
+        ]
+      },
+      "ContactAssociation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "example": 101
+          },
+          "firstname": {
+            "type": "string",
+            "example": "Kim",
+            "description": "The firstname of the person"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Mustermann",
+            "description": "The unique id of the person"
+          },
+          "mail": {
+            "type": "string",
+            "example": "kim@mustermann.de"
+          },
+          "sex": {
+            "type": "integer",
+            "example": 5,
+            "description": "male (1), female (2), non binary (5)"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "integer"
+          },
+          "dev": {
+            "type": "object"
+          }
+        }
+      },
+      "AssociationApiResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Association"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "ContactAssociationApiResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactAssociation"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      }
+    }
+  }
+}

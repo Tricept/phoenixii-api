@@ -148,7 +148,7 @@ components:
           description: "The HEadline of the newsletter edition"
         write_to:
           type: string
-          example: "Sehr geehrte Damen und Herren"
+          example: "Guten Tag Damen und Herren"
           description: "First-Line / Anschreiben of the newsletter edition"
         sender_name:
           type: string
@@ -206,7 +206,7 @@ components:
           description: "The subscribers short salutation"
         salutation:
           type: string
-          example: "Sehr geehrter Herr"
+          example: "Guten Tag Herr"
           description: "The subscribers full salutation"
         email:
           type: string

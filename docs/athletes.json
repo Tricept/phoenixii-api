@@ -420,10 +420,12 @@
           "license_from": {
             "type": "string",
             "format": "date",
+            "description": "date for start of new license",
             "example": "2020-01-01"
           },
           "club_id": {
             "type": "string",
+            "description": "id for applicant club / new club",
             "example": "WX00123456"
           },
           "applicant": {

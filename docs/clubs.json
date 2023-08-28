@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "description": "This is a simple description for the PhoenixII Clubs-API. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.",
-    "version": "1.1.13",
+    "version": "1.1.14",
     "title": "Clubs API",
     "contact": {
       "email": "phoenix-api@it4sport.de"
@@ -131,6 +131,130 @@
             "api_key": []
           }
         ]
+      }
+    },
+    "/club/{Club}/change-invoice-address": {
+      "put": {
+        "tags": [
+          "clubs"
+        ],
+        "summary": "change of invoice address of the club",
+        "description": "With this API call you can change an invoice address of a club",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Club",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The invoice address of this club is being changed"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "This is the body of the request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeInvoiceAddress"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeInvoiceAddress"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404 Not Found"
+          }
+        }
+      }
+    },
+    "/club/{Club}/change-post-address": {
+      "put": {
+        "tags": [
+          "clubs"
+        ],
+        "summary": "change of post address of the club",
+        "description": "With this API call you can change an post address of a club",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Club",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "description": "The post address of this club is being changed"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "This is the body of the request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePostAddress"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePostAddress"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404 Not Found"
+          }
+        }
       }
     }
   },
@@ -717,6 +841,242 @@
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "ChangeInvoiceAddress": {
+        "type": "object",
+        "required": [
+          "formOfAddress",
+          "firstname",
+          "lastname",
+          "address",
+          "email"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "example": "Die Sportfirma",
+            "description": "name of the company"
+          },
+          "formOfAddress": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Herr",
+              "Frau",
+              "Geschäftsstelle",
+              "Firma",
+              null,
+              "An",
+              "Divers"
+            ],
+            "example": "Herr",
+            "description": "form of address of person"
+          },
+          "firstname": {
+            "type": "string",
+            "example": "Max",
+            "description": "first name of person"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Mustermann",
+            "description": "last name of person"
+          },
+          "title": {
+            "type": "string",
+            "example": "Dr.",
+            "description": "title of person"
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "street",
+              "postcode",
+              "city"
+            ],
+            "description": "Updated invoice address",
+            "properties": {
+              "street": {
+                "type": "string",
+                "example": "Exampelstraße 1",
+                "description": "Updated invoice address of the club"
+              },
+              "postcode": {
+                "type": "string",
+                "maxLength": 10,
+                "example": "55555",
+                "description": "Updated invoice postal code of the city of the club"
+              },
+              "city": {
+                "type": "string",
+                "example": "Stuttgart",
+                "description": "Updated city of the club"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "example": 45.5656565656,
+                "description": "latitude of place"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "example": 45.5656565656,
+                "description": "longitude of place"
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$",
+                "example": "GER",
+                "description": "country of the place"
+              }
+            }
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "email of person",
+            "example": "max@mustermann.com"
+          }
+        }
+      },
+      "ChangePostAddress": {
+        "type": "object",
+        "required": [
+          "formOfAddress",
+          "firstname",
+          "lastname",
+          "address",
+          "email"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "example": "Die Sportfirma",
+            "description": "name of the company"
+          },
+          "formOfAddress": {
+            "type": "string",
+            "enum": [
+              "Herr",
+              "Frau",
+              "Geschäftsstelle",
+              "Firma",
+              null,
+              "An",
+              "Divers"
+            ],
+            "example": "Herr",
+            "description": "form of address of person"
+          },
+          "firstname": {
+            "type": "string",
+            "example": "Max",
+            "description": "first name of person"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Mustermann",
+            "description": "last name of person"
+          },
+          "title": {
+            "type": "string",
+            "example": "Dr.",
+            "description": "title of person"
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "street",
+              "postcode",
+              "city"
+            ],
+            "description": "Updated post address",
+            "properties": {
+              "street": {
+                "type": "string",
+                "example": "Exampelstraße 1",
+                "description": "Updated post address of the club"
+              },
+              "postcode": {
+                "type": "string",
+                "maxLength": 10,
+                "example": "55555",
+                "description": "Updated postal code of the city of the club"
+              },
+              "city": {
+                "type": "string",
+                "example": "Stuttgart",
+                "description": "Updated city of the club"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "example": 45.5656565656,
+                "description": "latitude of place"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "example": 45.5656565656,
+                "description": "longitude of place"
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$",
+                "example": "GER",
+                "description": "country of the place"
+              }
+            }
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "email of person",
+            "example": "max@mustermann.com"
+          }
+        }
+      },
+      "ChangeStatus": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7d342a44-7b0c-42d3-8900-13dd624eae88",
+            "description": "The change status unique ID. ID is used to request status changes."
+          },
+          "status_type": {
+            "type": "string",
+            "example": "pending",
+            "enum": [
+              "approved",
+              "pending",
+              "rejected"
+            ],
+            "description": "The status type"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Borrowed items were not returned",
+            "maxLength": 1024
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
           }
         }
       }

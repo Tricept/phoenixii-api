@@ -1,5 +1,5 @@
 
-# Phoenix II - API Documentation
+# [DEV] Phoenix II - API Documentation
 
 ## Introduction
 This is the official API documentation of Phoenix II.
@@ -14,10 +14,7 @@ For general errors in Phoenix II please use the support system within Phoenix II
 
 
 ## API Access
-If you need access to the Phoenix II API, please contact your association or send an inquiry via the Phoenix II support system.
-
-## Wiki
-A detailed description for each module can be found in our [Wiki](https://tricept.atlassian.net/wiki/spaces/PIIWIKI).
+If you need access to the Phoenix II interfaces, please contact your association or send an inquiry via the Phoenix II support system.
 
 ## Contact
 You can also contact the Developers directly via this e-mail: phoenix-api(at)it4sport(dot)de
