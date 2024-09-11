@@ -9,6 +9,32 @@ tags:
   - name: athletes
     description: act with the athletes search API.
 paths:
+  /athletes/all:
+    get:
+      tags:
+        - athletes
+      summary: get all athletes
+      parameters:
+        - name: 'changed_since'
+          in: query
+          description: Filter changed since a specific date
+          required: false
+          schema:
+            type: string
+            format: date
+            example: '2001-01-12'
+            pattern: '^((?:19|20)\d\d)[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$'
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: 404 Not Found
+      security:
+        - api_key: []
   /athletes/search:
     get:
       tags:
@@ -74,7 +100,7 @@ paths:
         '404':
           description: 404 Not Found
       security:
-        - api_key: []
+        - api_key: [ ]
   /athletes/change:
     put:
       tags:
