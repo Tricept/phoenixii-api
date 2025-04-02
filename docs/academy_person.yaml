@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Academy Person API
+  description: API zur Verwaltung von Personen in der Academy
+  version: 1.0.0
+paths:
+  /api/v1/academy-person:
+    post:
+      summary: Erstelle eine neue Person
+      description: Erstellt eine neue Person oder aktualisiert eine bestehende basierend auf Name, Vorname und E-Mail.
+      operationId: createAcademyPerson
+      tags:
+        - Academy Person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - firstname
+                - uVerein
+                - uFunktion
+                - email
+                - gender
+              properties:
+                name:
+                  type: string
+                  description: Nachname der Person
+                firstname:
+                  type: string
+                  description: Vorname der Person
+                uVerein:
+                  type: string
+                  format: uuid
+                  description: UUID des Vereins
+                uFunktion:
+                  type: string
+                  format: uuid
+                  description: UUID der Funktion
+                email:
+                  type: string
+                  format: email
+                  description: E-Mail-Adresse der Person
+                gender:
+                  type: string
+                  enum: [m, w]
+                  description: Geschlecht der Person ('m' für männlich, 'w' für weiblich)
+      responses:
+        "200":
+          description: Erfolgreiche Erstellung oder Aktualisierung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  uPerson:
+                    type: string
+                    format: uuid
+                    description: UUID der erstellten oder aktualisierten Person
+        "400":
+          description: Ungültige Anfrage oder fehlende Parameter
+        "500":
+          description: Serverfehler
