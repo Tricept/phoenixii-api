@@ -1,0 +1,1578 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Registrierungs- & Checkout-API",
+    "version": "1.0.0",
+    "description": "API für den mehrstufigen Registrierungs- und Checkout-Prozess"
+  },
+  "tags": [
+    {
+      "name": "0. Flow"
+    },
+    {
+      "name": "1. Login"
+    },
+    {
+      "name": "2. Persönliche Daten"
+    },
+    {
+      "name": "3. Verein"
+    },
+    {
+      "name": "4. Zahlung"
+    },
+    {
+      "name": "5. Extras"
+    },
+    {
+      "name": "6. Bestellübersicht"
+    }
+  ],
+  "paths": {
+    "/course/registration-wizard/steps": {
+      "get": {
+        "tags": [
+          "0. Flow"
+        ],
+        "summary": "Wizard-Steps abrufen",
+        "description": "Gibt zurück, welche Steps im Registrierungs-/Checkout-Wizard angezeigt werden sollen, in welcher Reihenfolge und ob sie aktiv/erforderlich sind. Ermöglicht serverseitige Steuerung des gesamten Flows (z. B. Verein-Step ausblenden, Extras nur bei bestimmten Produkten).",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Geordnete Liste der Steps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/login": {
+      "get": {
+        "tags": [
+          "1. Login"
+        ],
+        "summary": "Login-Optionen abrufen",
+        "description": "Gibt zurück, ob Registrierung, Anmeldung und/oder Gastanmeldung erlaubt sind.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verfügbare Login-Optionen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginOptions"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "1. Login"
+        ],
+        "summary": "Nutzer einloggen",
+        "description": "Loggt den Nutzer ein, validiert die Felder und gibt Session-Token sowie Nutzerdaten zurück.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich eingeloggt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validierungsfehler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültige Anmeldedaten"
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/personal-data": {
+      "get": {
+        "tags": [
+          "2. Persönliche Daten"
+        ],
+        "summary": "Persönliche Daten / Formularfelder abrufen",
+        "description": "Gibt die verfügbaren Formularfelder zurück. Bei eingeloggtem Nutzer werden die gespeicherten Werte mitgeliefert. Andernfalls wird die übergebene E-Mail als Vorausfüllung für das E-Mail-Feld verwendet.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "description": "E-Mail-Adresse für Gäste zur Vorausfüllung",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "security": [
+          {
+            "SessionToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Formularfelder (ggf. mit Vorausfüllwerten)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalDataForm"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "2. Persönliche Daten"
+        ],
+        "summary": "Persönliche Daten speichern",
+        "description": "Speichert die persönlichen Daten für eingeloggte Nutzer und validiert alle Felder.",
+        "security": [
+          {
+            "SessionToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonalDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daten erfolgreich gespeichert"
+          },
+          "400": {
+            "description": "Validierungsfehler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/club/status": {
+      "get": {
+        "tags": [
+          "3. Verein"
+        ],
+        "summary": "Vereinsstatus-Optionen abrufen",
+        "description": "Gibt die verfügbaren Stati zurück: Mitglied in Verein X, kein Mitglied, Fremdverein (mit Option zur Neuanlage).",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Vereinsstatus-Optionen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubStatusOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/club/search": {
+      "get": {
+        "tags": [
+          "3. Verein"
+        ],
+        "summary": "Vereinssuche",
+        "description": "Sucht nach Vereinen anhand eines Suchbegriffs.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Suchbegriff",
+            "schema": {
+              "type": "string",
+              "minLength": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suchergebnisse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Club"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/payment": {
+      "get": {
+        "tags": [
+          "4. Zahlung"
+        ],
+        "summary": "Zahlungsarten abrufen",
+        "description": "Gibt verfügbare Zahlungsarten zurück. Bei eingeloggtem Nutzer werden vorhandene Kontodaten mitgeliefert.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "security": [
+          {
+            "SessionToken": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "Verfügbare Zahlungsarten und ggf. gespeicherte Kontodaten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOptions"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "4. Zahlung"
+        ],
+        "summary": "Kontodaten validieren",
+        "description": "Prüft die eingegebenen Kontodaten (z. B. IBAN-Validierung).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kontodaten gültig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentValidationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Kontodaten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/extras": {
+      "get": {
+        "tags": [
+          "5. Extras"
+        ],
+        "summary": "Benötigte Extras abrufen",
+        "description": "Gibt zurück, welche Extras (Fragen, MFG, Nachweise) für diesen Vorgang benötigt werden.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der benötigten Extras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtrasConfig"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "5. Extras"
+        ],
+        "summary": "Extras-Daten validieren",
+        "description": "Validiert die eingegebenen Daten für Fragen, Mitfahrgelegenheit und Nachweise.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtrasRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daten gültig"
+          },
+          "400": {
+            "description": "Validierungsfehler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/extras/questions": {
+      "get": {
+        "tags": [
+          "5. Extras"
+        ],
+        "summary": "Persönliche Fragen abrufen",
+        "description": "Gibt die persönlichen Fragen zurück, die der Nutzer beantworten muss.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Fragen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Question"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/extras/carpooling-types": {
+      "get": {
+        "tags": [
+          "5. Extras"
+        ],
+        "summary": "Mitfahrgelegenheit-Typen abrufen",
+        "description": "Gibt die verfügbaren Typen für Mitfahrgelegenheiten zurück.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der MFG-Typen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CarpoolingType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/extras/proofs": {
+      "get": {
+        "tags": [
+          "5. Extras"
+        ],
+        "summary": "Nachweise abrufen",
+        "description": "Gibt die benötigten Nachweise zurück.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Nachweise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Proof"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/order": {
+      "get": {
+        "tags": [
+          "6. Bestellübersicht"
+        ],
+        "summary": "Bestellungen abrufen",
+        "description": "Gibt die aktuellen Bestellpositionen zurück.",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bestellpositionen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/order/checkboxes": {
+      "get": {
+        "tags": [
+          "6. Bestellübersicht"
+        ],
+        "summary": "Bestätigungs-Checkboxen abrufen",
+        "description": "Gibt die Checkboxen zurück, die der Nutzer zur Bestätigung abhaken muss (z. B. AGB, Datenschutz).",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": true,
+            "description": "ID des Kurses",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Bestätigungs-Checkboxen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfirmationCheckbox"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/order/precalculate": {
+      "post": {
+        "tags": [
+          "6. Bestellübersicht"
+        ],
+        "summary": "Kosten vorberechnen",
+        "description": "Berechnet die voraussichtlichen Kosten auf Basis der aktuellen Eingaben.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrecalculationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vorberechnete Kosten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecalculationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/course/registration-wizard/order/submit": {
+      "post": {
+        "tags": [
+          "6. Bestellübersicht"
+        ],
+        "summary": "Bestellung abschließen",
+        "description": "Überträgt alle Daten, legt ggf. einen neuen Nutzer an, speichert alle Daten, führt abschließende Validierung durch, meldet den Nutzer an, versendet E-Mails und liefert die Daten für die Übersichtsseite zurück.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSubmitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bestellung erfolgreich abgeschlossen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderSubmitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validierungsfehler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SessionToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "token",
+        "description": "Session-Token aus dem Login-Endpoint"
+      }
+    },
+    "schemas": {
+      "StepsResponse": {
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          }
+        },
+        "required": [
+          "steps"
+        ]
+      },
+      "Step": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "login",
+              "personal-data",
+              "club",
+              "payment",
+              "extras",
+              "order",
+              "summary"
+            ],
+            "description": "Eindeutiger Bezeichner des Steps"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Anzeigereihenfolge (aufsteigend)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Anzeigename des Steps (z. B. für Progress-Bar)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Ob der Step im aktuellen Flow aktiv ist"
+          },
+          "skippable": {
+            "type": "boolean",
+            "description": "Ob der Step übersprungen werden darf"
+          }
+        },
+        "required": [
+          "id",
+          "order",
+          "label",
+          "enabled",
+          "skippable"
+        ],
+        "example": {
+          "id": "club",
+          "order": 3,
+          "label": "Verein",
+          "enabled": true,
+          "skippable": false
+        }
+      },
+      "LoginOptions": {
+        "type": "object",
+        "properties": {
+          "allow_registration": {
+            "type": "boolean"
+          },
+          "allow_login": {
+            "type": "boolean"
+          },
+          "allow_guest": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allow_registration",
+          "allow_login",
+          "allow_guest"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "login",
+              "register",
+              "guest"
+            ],
+            "description": "Art der Anmeldung"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_id",
+          "type",
+          "email"
+        ]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "session_token": {
+            "type": "string"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          }
+        },
+        "required": [
+          "session_token",
+          "person"
+        ]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "is_guest": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "is_guest"
+        ]
+      },
+      "FormField": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "email",
+              "date",
+              "select",
+              "checkbox",
+              "tel"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            },
+            "nullable": true
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "required"
+        ]
+      },
+      "PersonalDataForm": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormField"
+            }
+          }
+        },
+        "required": [
+          "fields"
+        ]
+      },
+      "PersonalDataRequest": {
+        "type": "object",
+        "description": "Key-Value-Paare der persönlichen Daten gemäß den zurückgegebenen Feldern",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          }
+        },
+        "required": [
+          "course_id"
+        ],
+        "additionalProperties": true,
+        "example": {
+          "course_id": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+          "first_name": "Max",
+          "last_name": "Mustermann",
+          "email": "max@example.com",
+          "birth_date": "1990-01-15",
+          "phone": "+491234567890"
+        }
+      },
+      "ClubStatusOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubStatus"
+            }
+          }
+        },
+        "required": [
+          "statuses"
+        ]
+      },
+      "ClubStatus": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "member",
+              "non_member",
+              "external_club"
+            ]
+          },
+          "club_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "nullable": true
+          },
+          "club_name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type"
+        ]
+      },
+      "Club": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "name": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PaymentOptions": {
+        "type": "object",
+        "properties": {
+          "methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethod"
+            }
+          },
+          "saved_account": {
+            "$ref": "#/components/schemas/BankAccount",
+            "nullable": true,
+            "description": "Gespeicherte Kontodaten bei eingeloggtem Nutzer"
+          }
+        },
+        "required": [
+          "methods"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sepa",
+              "invoice",
+              "paypal",
+              "credit_card"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type"
+        ]
+      },
+      "BankAccount": {
+        "type": "object",
+        "properties": {
+          "iban": {
+            "type": "string"
+          },
+          "bic": {
+            "type": "string"
+          },
+          "account_holder": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "iban",
+          "account_holder"
+        ]
+      },
+      "PaymentValidationRequest": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          },
+          "method_id": {
+            "type": "string"
+          },
+          "iban": {
+            "type": "string"
+          },
+          "bic": {
+            "type": "string"
+          },
+          "account_holder": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_id",
+          "method_id"
+        ]
+      },
+      "PaymentValidationResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "bank_name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "valid"
+        ]
+      },
+      "ExtrasConfig": {
+        "type": "object",
+        "properties": {
+          "requires_questions": {
+            "type": "boolean"
+          },
+          "requires_carpooling": {
+            "type": "boolean"
+          },
+          "requires_proofs": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requires_questions",
+          "requires_carpooling",
+          "requires_proofs"
+        ]
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "text": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "select",
+              "boolean",
+              "number"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "type",
+          "required"
+        ]
+      },
+      "CarpoolingType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ]
+      },
+      "Proof": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "accepted_formats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "required"
+        ]
+      },
+      "ExtrasRequest": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          },
+          "question_answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+                },
+                "answer": {}
+              },
+              "required": [
+                "question_id",
+                "answer"
+              ]
+            }
+          },
+          "carpooling": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          },
+          "proofs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "proof_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+                },
+                "file_base64": {
+                  "type": "string"
+                },
+                "file_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "proof_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "course_id"
+        ]
+      },
+      "OrderSummary": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "total_gross": {
+            "type": "number",
+            "format": "float"
+          },
+          "currency": {
+            "type": "string",
+            "example": "EUR"
+          }
+        },
+        "required": [
+          "items",
+          "total_gross",
+          "currency"
+        ]
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unit_price": {
+            "type": "number",
+            "format": "float"
+          },
+          "total_price": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "quantity",
+          "unit_price",
+          "total_price"
+        ]
+      },
+      "ConfirmationCheckbox": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "label": {
+            "type": "string"
+          },
+          "link_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "required"
+        ]
+      },
+      "PrecalculationRequest": {
+        "type": "object",
+        "description": "Aktueller Zwischenstand aller Formulardaten zur Kostenberechnung",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          },
+          "personal_data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "club_status_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "payment_method_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "extras": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "course_id"
+        ]
+      },
+      "PrecalculationResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "total_gross": {
+            "type": "number",
+            "format": "float"
+          },
+          "currency": {
+            "type": "string",
+            "example": "EUR"
+          }
+        },
+        "required": [
+          "items",
+          "total_gross",
+          "currency"
+        ]
+      },
+      "OrderSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e",
+            "description": "ID des Kurses"
+          },
+          "login": {
+            "$ref": "#/components/schemas/LoginRequest"
+          },
+          "personal_data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "club_status_id": {
+            "type": "string"
+          },
+          "new_club_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "$ref": "#/components/schemas/PaymentValidationRequest"
+          },
+          "extras": {
+            "$ref": "#/components/schemas/ExtrasRequest"
+          },
+          "confirmed_checkbox_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "course_id",
+          "personal_data",
+          "club_status_id",
+          "payment",
+          "confirmed_checkbox_ids"
+        ]
+      },
+      "OrderSubmitResponse": {
+        "type": "object",
+        "properties": {
+          "session_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f5d4ad5-f79a-4efb-a7dc-aab7d750ac5e"
+          },
+          "order_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "total_gross": {
+            "type": "number",
+            "format": "float"
+          },
+          "currency": {
+            "type": "string",
+            "example": "EUR"
+          },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "confirmation_email_sent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "person",
+          "order_id",
+          "order_date",
+          "items",
+          "total_gross",
+          "currency",
+          "confirmation_email_sent"
+        ]
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "message",
+          "errors"
+        ]
+      }
+    }
+  }
+}
