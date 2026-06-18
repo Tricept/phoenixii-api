@@ -1,0 +1,255 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This is a simple description for the PhoenixII Licenseholder-API. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.",
+    "version": "1.3.4",
+    "title": "Licenseholder API",
+    "contact": {
+      "email": "phoenix-api@it4sport.de"
+    }
+  },
+  "paths": {
+    "/license-holders": {
+      "get": {
+        "tags": [
+          "license-holders"
+        ],
+        "summary": "Show All Persons with license information",
+        "description": "With this API call you will get all Persons that belong to your client that posess a license  ",
+        "operationId": "showLicensees",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to retrieve",
+            "schema": {
+              "type": "number",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "limits the amount of records per page",
+            "schema": {
+              "type": "number",
+              "default": 1000
+            }
+          }
+        ],
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/licenseHolderList"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{env}{client}.it4sport.de/api/",
+      "variables": {
+        "env": {
+          "description": "This is the environment you will call the API",
+          "default": "dev",
+          "enum": [
+            "test",
+            "testing",
+            "dev"
+          ]
+        },
+        "client": {
+          "description": "This is the client you will call the API",
+          "default": "btv"
+        }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-Auth-Token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "licenseHolderList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "list of all found function holders",
+            "items": {
+              "$ref": "#/components/schemas/person"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          }
+        }
+      },
+      "person": {
+        "type": "object",
+        "description": "Found Person",
+        "properties": {
+          "lastname": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "birthdate": {
+            "type": "string"
+          },
+          "sex": {
+            "type": "string"
+          },
+          "salutation": {
+            "type": "string"
+          },
+          "address_nr": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "zip_code": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "mobile": {
+            "type": "string"
+          },
+          "nationality": {
+            "type": "string"
+          },
+          "license_type": {
+            "type": "string"
+          },
+          "license_nr": {
+            "type": "string"
+          },
+          "license_nr_dosb": {
+            "type": "string"
+          },
+          "license_nr_lsv": {
+            "type": "string"
+          },
+          "license_notes": {
+            "type": "string"
+          },
+          "club_nr": {
+            "type": "string"
+          },
+          "printed_at": {
+            "type": "string"
+          },
+          "valid_until": {
+            "type": "string"
+          },
+          "examination_date": {
+            "type": "string"
+          },
+          "club": {
+            "type": "string"
+          },
+          "upskilling_date": {
+            "type": "string"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "description": "pagination meta data",
+        "properties": {
+          "current_page": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "integer"
+          },
+          "last_page": {
+            "type": "integer"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "active": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "path": {
+            "type": "string"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "to": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "sort": {
+            "type": "string"
+          }
+        }
+      },
+      "Links": {
+        "type": "object",
+        "description": "pagination links",
+        "properties": {
+          "first": {
+            "type": "string"
+          },
+          "last": {
+            "type": "string"
+          },
+          "prev": {
+            "type": "string"
+          },
+          "next": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
