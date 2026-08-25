@@ -1,0 +1,581 @@
+openapi: 3.0.0
+info:
+  description: >-
+    This is a simple description for the PhoenixII Function Holder-API. The parameters
+    {env} and {client} in the URL are needed. They represent the right
+    environment and client for the API. These parameter will be given with API
+    key.
+  version: 1.3.4
+  title: Function Holder API
+  contact:
+    email: phoenix-api@it4sport.de
+paths:
+  /functions:
+    get:
+      tags:
+        - function-holder
+      summary: Show All Functions of the given Client
+      description: >-
+        With this API call you will get all Functions that belong to your client
+        that posess the given Function
+      operationId: showFunctions
+      parameters:
+        - name: association_level
+          in: query
+          description: Use to specify which association level the Functions should have 
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: The page number to retrieve
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          description: limits the amount of records per page
+          schema:
+            type: number
+            default: 25
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/functionListResponse'
+  /function-holders:
+    get:
+      tags:
+        - function-holder
+      summary: Show All Persons with given function
+      description: >-
+        With this API call you will get all Persons that belong to your client
+        that posess the given Function
+      operationId: showPersons
+      parameters:
+        - name: function_id
+          in: query
+          description: The unique identifiers of the functions to retrieve holders for.
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: club_id
+          in: query
+          description: Use to specify which club the Persons should belong to
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: district_id
+          in: query
+          description: Use to specify which district the People should belong to
+          required: false
+          schema:
+            type: number
+        - name: county_id
+          in: query
+          description: Use to specify which district the People should belong to
+          required: false
+          schema:
+            type: number
+        - name: association_id
+          in: query
+          description: Use to specify which association the People should belong to. Returns people from all a Associations if not given
+          required: false
+          schema:
+            type: number
+        - name: sort
+          in: query
+          description: Use to specify how the returned objects should be sorted
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+            default: name
+        - name: page
+          in: query
+          description: The page number to retrieve
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          description: limits the amount of records per page
+          schema:
+            type: number
+            default: 25
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonListResponse'
+  /board-member:
+    get:
+      tags:
+        - board
+      summary: Show All Persons who are Part of the given Board
+      description: With this API call you will get all Persons that belong to the given Board
+      operationId: showBoardMembers
+      parameters:
+        - name: board_id
+          in: query
+          description: The unique identifiers of the boards to retrieve the members of
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: sort
+          in: query
+          description: Use to specify how the returned objects should be sorted
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+            default: name
+        - name: district_id
+          in: query
+          description: Use to specify which district the People should belong to
+          required: false
+          schema:
+            type: number
+        - name: county_id
+          in: query
+          description: Use to specify which district the People should belong to
+          required: false
+          schema:
+            type: number
+        - name: association_id
+          in: query
+          description: Use to specify which association the People should belong to. Returns people from all a Associations if not given
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: The page number to retrieve
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          description: limits the amount of records per page
+          schema:
+            type: number
+            default: 25
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardMemberListResponse'
+  /association-level:
+    get:
+      tags:
+        - association-level
+      summary: Show All Levels of your Association
+      description: With this API call you will get all Association Levels of your client
+      operationId: showAssociationLevel
+      parameters:
+        - name: association_level
+          in: query
+          description: The association Level to retrieve.
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: The page number to retrieve
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          description: limits the amount of records per page
+          schema:
+            type: number
+            default: 25
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationLevelListResponse'
+  /boards:
+    get:
+      tags:
+        - board
+      summary: Show All Boards
+      description: With this API call you will get all Boards that belong to your client
+      operationId: showBoards
+      parameters:
+        - name: sort
+          in: query
+          description: Use to specify how the returned objects should be sorted
+          required: false
+          schema:
+            type: string
+            enum:
+              - description
+            default: description
+        - name: page
+          in: query
+          description: The page number to retrieve
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          description: limits the amount of records per page
+          schema:
+            type: number
+            default: 25
+        - name: association_level
+          in: query
+          description: which association level to retrieve boards of.
+          schema:
+            type: number
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardListResponse'
+servers:
+  - url: https://{env}{client}.it4sport.de/api/
+    variables:
+      env:
+        description: This is the environment you will call the API
+        default: dev
+        enum:
+          - test
+          - testing
+          - dev
+      client:
+        description: This is the client you will call the API
+        default: webinar
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-Auth-Token
+      in: header
+  schemas:
+    PersonListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: list of all found function holders
+          items:
+            $ref: '#/components/schemas/person'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        links:
+          $ref: '#/components/schemas/Links'
+    person:
+      type: object
+      description: Found Person
+      properties:
+        person_id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        title:
+          type: string
+        function_id:
+          type: string
+        function_description:
+          type: string
+        function_nr:
+          type: number
+        function_type_id:
+          type: number
+        country_code:
+          type: string
+        zip_code:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        email:
+          type: string
+        phone_private:
+          type: string
+        phone_business:
+          type: string
+        mobile_private:
+          type: string
+        mobile_business:
+          type: string
+        fax_private:
+          type: string
+        fax_business:
+          type: string
+        county_id:
+          type: number
+        county_name:
+          type: string
+        district_id:
+          type: number
+        district_name:
+          type: string
+        district_name_short:
+          type: string
+        level:
+          type: number
+        image:
+          type: string
+        website:
+          type: string
+    BoardMemberListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: List of all found board members
+          items:
+            $ref: '#/components/schemas/boardMember'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        links:
+          $ref: '#/components/schemas/Links'
+    BoardListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: Eine Liste aller gefundenen Gremien
+          items:
+            $ref: '#/components/schemas/board'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        links:
+          $ref: '#/components/schemas/Links'
+    board:
+      type: object
+      description: Found Board
+      properties:
+        board_id:
+          type: string
+        association_level:
+          type: number
+        description:
+          type: string
+        description_short:
+          type: string
+    AssociationLevelListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: Eine Liste aller gefundenen Gremien
+          items:
+            $ref: '#/components/schemas/AssociatonLevel'
+        meta:
+          type: object
+          properties:
+            current_page:
+              type: integer
+            from:
+              type: integer
+            last_page:
+              type: integer
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  label:
+                    type: string
+                  active:
+                    type: boolean
+            path:
+              type: string
+            per_page:
+              type: integer
+            to:
+              type: integer
+            total:
+              type: integer
+            filter:
+              type: object
+              properties:
+                nVerbandEbene:
+                  type: number
+        links:
+          $ref: '#/components/schemas/Links'
+    AssociatonLevel:
+      type: object
+      description: Verbands Ebene
+      properties:
+        name:
+          type: string
+        name_short:
+          type: string
+        number:
+          type: integer
+        association_id:
+          type: string
+        association-level:
+          type: integer
+        tenant_id:
+          type: integer
+        sport_type:
+          type: string
+    Meta:
+      type: object
+      description: pagination meta data
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+        last_page:
+          type: integer
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              label:
+                type: string
+              active:
+                type: boolean
+        path:
+          type: string
+        per_page:
+          type: integer
+        to:
+          type: integer
+        total:
+          type: integer
+        sort:
+          type: string
+    Links:
+      type: object
+      description: pagination links
+      properties:
+        first:
+          type: string
+        last:
+          type: string
+        prev:
+          type: string
+        next:
+          type: string
+    boardMember:
+      type: object
+      description: Found Person
+      properties:
+        person_id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        title:
+          type: string
+        board_id:
+          type: string
+        board:
+          type: string
+        function_id:
+          type: string
+        function_description:
+          type: string
+        function_nr:
+          type: number
+        function_type_id:
+          type: number
+        country_code:
+          type: string
+        zip_code:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        email:
+          type: string
+        phone_private:
+          type: string
+        phone_business:
+          type: string
+        mobile_private:
+          type: string
+        mobile_business:
+          type: string
+        fax_private:
+          type: string
+        fax_business:
+          type: string
+        sr_group_nr:
+          type: number
+        district_id:
+          type: number
+        district_name:
+          type: string
+        district_name_short:
+          type: string
+        level:
+          type: number
+        image:
+          type: string
+    functionResponse:
+      type: object
+      description: Found Function from the Client
+      properties:
+        function_id:
+          type: string
+        association_level:
+          type: number
+        name:
+          type: string
+        function_nr:
+          type: number
+        assoc_level_assignment_id:
+          type: string
+    functionListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: list of all found function holders
+          items:
+            $ref: '#/components/schemas/functionResponse'
+        meta:
+          $ref: '#/components/schemas/Meta'
+        links:
+          $ref: '#/components/schemas/Links'
+
