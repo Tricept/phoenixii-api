@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: Course Participants API
+  version: 1.0.0
+  description: |
+    API-Endpunkt zum Aktualisieren des Teilnahmestatus eines Teilnehmers an einem Seminar.
+    Diese Route erlaubt das Setzen, ob ein Teilnehmer das Seminar bestanden hat oder nicht.
+
+paths:
+  /api/courses/participants/setpassed:
+    post:
+      summary: Setzt den Teilnahme- und Bestehensstatus eines Teilnehmers
+      operationId: setPassed
+      tags:
+        - Course Participants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - uSeminar
+                - uPerson
+                - passed
+              properties:
+                uSeminar:
+                  type: string
+                  format: uuid
+                  description: UUID des Seminars
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                uPerson:
+                  type: string
+                  format: uuid
+                  description: UUID der Person
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                passed:
+                  type: boolean
+                  description: Gibt an, ob die Person bestanden hat
+                  example: true
+      responses:
+        '200':
+          description: Teilnehmer wurde erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Teilnehmer wurde aktualisiert."
+                  participant:
+                    type: object
+                    properties:
+                      uPerson:
+                        type: string
+                        format: uuid
+                        example: "123e4567-e89b-12d3-a456-426614174000"
+                      name:
+                        type: string
+                        example: "Max Mustermann"
+                      passed:
+                        type: boolean
+                        example: true
+                      status:
+                        type: string
+                        enum: [passed, not_passed]
+                        example: "passed"
+        '404':
+          description: Seminar, Person oder Teilnehmer nicht gefunden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Seminar nicht gefunden."
+                  errors:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '422':
+          description: Validierungsfehler
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+components:
+  schemas:
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Die übermittelten Daten sind ungültig."
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
