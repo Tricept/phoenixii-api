@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "This is the documentation for the public PhoenixII Financial Support Programs API. The parameters {env} and {client} in the server URL represent the environment and client/mandant. The API provides read-only access to published financial support programs and does not require authentication.",
+    "description": "This is the documentation for the public PhoenixII Financial Support Programs API. The parameters {env} and {client} in the server URL represent the environment and client/mandant. The API provides read-only access to published financial support programs and requires authentication via an API key sent in the X-Auth-Token header (or query parameter).",
     "version": "1.0.0",
     "title": "Financial Support Programs API",
     "contact": {
@@ -151,17 +151,6 @@
               "format": "date"
             },
             "example": "2026-12-31"
-          },
-          {
-            "name": "filter[updated_after]",
-            "in": "query",
-            "description": "Filter programs by their last changed date and time. Only programs updated at or after this value are returned.",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "example": "2026-01-01T00:00:00+01:00"
           }
         ],
         "responses": {
@@ -175,6 +164,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
           "422": {
             "description": "failed",
             "content": {
@@ -186,7 +178,11 @@
             }
           }
         },
-        "security": []
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
       }
     },
     "/official/financial-support-programs/{uWorkflow}": {
@@ -221,11 +217,18 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
           "404": {
             "description": "The financial support program was not found, is not published or is not a financial support workflow."
           }
         },
-        "security": []
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
       }
     }
   },
@@ -250,18 +253,26 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-Auth-Token",
+        "in": "header"
+      }
+    },
     "schemas": {
       "FinancialSupportProgramModel": {
         "type": "object",
         "required": [
           "id",
-          "general",
+          "intern",
+          "name",
+          "description",
           "contact_person",
           "settings",
           "financial_support_settings",
           "information",
-          "links",
-          "updated_at"
+          "links"
         ],
         "properties": {
           "id": {
@@ -270,41 +281,6 @@
             "example": "7d342a44-7b0c-42d3-8900-13dd624eae88",
             "description": "The financial support program unique identifier."
           },
-          "general": {
-            "$ref": "#/components/schemas/FinancialSupportProgramGeneral"
-          },
-          "contact_person": {
-            "$ref": "#/components/schemas/FinancialSupportProgramContactPerson"
-          },
-          "settings": {
-            "$ref": "#/components/schemas/FinancialSupportProgramSettings"
-          },
-          "financial_support_settings": {
-            "$ref": "#/components/schemas/FinancialSupportProgramFinanceSettings"
-          },
-          "information": {
-            "$ref": "#/components/schemas/FinancialSupportProgramInformation"
-          },
-          "links": {
-            "$ref": "#/components/schemas/FinancialSupportProgramLinks"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "example": "2026-09-10T10:00:00+02:00",
-            "description": "The date and time the program was last changed."
-          }
-        }
-      },
-      "FinancialSupportProgramGeneral": {
-        "type": "object",
-        "required": [
-          "intern",
-          "name",
-          "description"
-        ],
-        "properties": {
           "intern": {
             "type": "string",
             "nullable": true,
@@ -322,6 +298,21 @@
             "nullable": true,
             "example": "Financial support for projects in youth sports.",
             "description": "A short description of the program."
+          },
+          "contact_person": {
+            "$ref": "#/components/schemas/FinancialSupportProgramContactPerson"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/FinancialSupportProgramSettings"
+          },
+          "financial_support_settings": {
+            "$ref": "#/components/schemas/FinancialSupportProgramFinanceSettings"
+          },
+          "information": {
+            "$ref": "#/components/schemas/FinancialSupportProgramInformation"
+          },
+          "links": {
+            "$ref": "#/components/schemas/FinancialSupportProgramLinks"
           }
         }
       },
@@ -362,7 +353,6 @@
           "publication_status",
           "start",
           "end",
-          "format",
           "is_open"
         ],
         "properties": {
@@ -401,12 +391,6 @@
             "nullable": true,
             "example": "2026-12-31T23:59:59+01:00",
             "description": "The date and time the program ends."
-          },
-          "format": {
-            "type": "string",
-            "nullable": true,
-            "example": "FP-{YEAR}-{NUMBER}",
-            "description": "The format used for application numbers."
           },
           "is_open": {
             "type": "boolean",
@@ -520,8 +504,8 @@
           "application": {
             "type": "string",
             "format": "uri",
-            "example": "https://example.org/financial-support/application/create?uWorkflow=7d342a44-7b0c-42d3-8900-13dd624eae88",
-            "description": "The URL used to start an application for this program."
+            "example": "https://example.org/financial-support/application/deeplink?uWorkflow=7d342a44-7b0c-42d3-8900-13dd624eae88",
+            "description": "The deeplink to start an application for this program. Visitors who are not logged in are sent through the portal login and land directly in the preselected application afterwards."
           }
         }
       },
