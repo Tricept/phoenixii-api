@@ -1,0 +1,491 @@
+openapi: 3.0.0
+info:
+  description:
+    This is the documentation for the public PhoenixII Financial Support
+    Programs API. The parameters {env} and {client} in the server URL represent
+    the environment and client/mandant. The API provides read-only access to
+    published financial support programs and requires authentication via an API
+    key sent in the X-Auth-Token header (or query parameter).
+  version: 1.0.0
+  title: Financial Support Programs API
+  contact:
+    email: phoenix-api@it4sport.de
+tags:
+  - name: financial-support-programs
+    description: Read published financial support programs.
+paths:
+  /official/financial-support-programs:
+    get:
+      tags:
+        - financial-support-programs
+      summary: show all published financial support programs for a client
+      description: >-
+        With this API call you will get a paginated list of all published
+        financial support programs belonging to the selected client.
+      operationId: showFinancialSupportPrograms
+      parameters:
+        - name: limit
+          in: query
+          description: "Use to limit the amount of programs. Default: 24 | Max: 200"
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 200
+            default: 24
+        - name: page
+          in: query
+          description: "The page offset in pagination. Default: 1"
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 1
+        - name: filter[id]
+          in: query
+          description: >-
+            Filter by one workflow UUID or by multiple comma-separated workflow
+            UUIDs.
+          required: false
+          schema:
+            type: string
+            maxLength: 2000
+          example: "7d342a44-7b0c-42d3-8900-13dd624eae88"
+        - name: filter[search]
+          in: query
+          description: >-
+            Filter by a part of the program name, internal name or description.
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          example: "Youth"
+        - name: filter[name]
+          in: query
+          description: "Filter by a part of the program name."
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          example: "Sports development"
+        - name: filter[intern]
+          in: query
+          description: "Filter by a part of the internal program name."
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          example: "FP-2026"
+        - name: filter[status]
+          in: query
+          description: |
+            Filter by the temporal status of the program. Allowed values:
+            - open: The program has started and has not ended.
+            - upcoming: The program starts in the future.
+            - closed: The program has ended.
+          required: false
+          schema:
+            type: string
+            enum:
+              - open
+              - upcoming
+              - closed
+          example: "open"
+        - name: filter[starts_after]
+          in: query
+          description: "Filter programs that start on or after this date."
+          required: false
+          schema:
+            type: string
+            format: date
+          example: "2026-01-01"
+        - name: filter[starts_before]
+          in: query
+          description: "Filter programs that start on or before this date."
+          required: false
+          schema:
+            type: string
+            format: date
+          example: "2026-12-31"
+        - name: filter[ends_after]
+          in: query
+          description: "Filter programs that end on or after this date."
+          required: false
+          schema:
+            type: string
+            format: date
+          example: "2026-01-01"
+        - name: filter[ends_before]
+          in: query
+          description: "Filter programs that end on or before this date."
+          required: false
+          schema:
+            type: string
+            format: date
+          example: "2026-12-31"
+      responses:
+        "200":
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialSupportProgramApiResponse"
+        "401":
+          description: "Unauthorized. The API key is missing or invalid."
+        "422":
+          description: failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - api_key: []
+  /official/financial-support-programs/{uWorkflow}:
+    get:
+      tags:
+        - financial-support-programs
+      summary: show a single published financial support program
+      description: >-
+        With this API call you will get a single published financial support
+        program by its workflow UUID.
+      operationId: showFinancialSupportProgram
+      parameters:
+        - in: path
+          name: uWorkflow
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: "The financial support program unique identifier."
+          example: "7d342a44-7b0c-42d3-8900-13dd624eae88"
+      responses:
+        "200":
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialSupportProgramDetailApiResponse"
+        "401":
+          description: "Unauthorized. The API key is missing or invalid."
+        "404":
+          description: >-
+            The financial support program was not found, is not published or is
+            not a financial support workflow.
+      security:
+        - api_key: []
+servers:
+  - url: "https://{env}api.it4sport.de/{client}/api"
+    variables:
+      env:
+        description: This is the environment you will call the API
+        default: test
+        enum:
+          - test
+          - testing
+          - dev
+      client:
+        description: This is the client/mandant you will call the API for
+        default: "webinar"
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-Auth-Token
+      in: header
+  schemas:
+    FinancialSupportProgramModel:
+      type: object
+      required:
+        - id
+        - intern
+        - name
+        - description
+        - contact_person
+        - settings
+        - financial_support_settings
+        - information
+        - links
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7d342a44-7b0c-42d3-8900-13dd624eae88"
+          description: "The financial support program unique identifier."
+        intern:
+          type: string
+          nullable: true
+          example: "FP-2026"
+          description: "The internal name of the program."
+        name:
+          type: string
+          nullable: true
+          example: "Financial support program for youth sports"
+          description: "The public name of the program."
+        description:
+          type: string
+          nullable: true
+          example: "Financial support for projects in youth sports."
+          description: "A short description of the program."
+        contact_person:
+          $ref: "#/components/schemas/FinancialSupportProgramContactPerson"
+        settings:
+          $ref: "#/components/schemas/FinancialSupportProgramSettings"
+        financial_support_settings:
+          $ref: "#/components/schemas/FinancialSupportProgramFinanceSettings"
+        information:
+          $ref: "#/components/schemas/FinancialSupportProgramInformation"
+        links:
+          $ref: "#/components/schemas/FinancialSupportProgramLinks"
+    FinancialSupportProgramContactPerson:
+      type: object
+      required:
+        - name
+        - email
+        - phone
+      properties:
+        name:
+          type: string
+          nullable: true
+          example: "Erika Mustermann"
+          description: "The name of the program contact person."
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "erika.mustermann@example.org"
+          description: "The email address of the program contact person."
+        phone:
+          type: string
+          nullable: true
+          example: "+49 123 456789"
+          description: "The phone number of the program contact person."
+    FinancialSupportProgramSettings:
+      type: object
+      required:
+        - type
+        - active
+        - publication_status
+        - start
+        - end
+        - is_open
+      properties:
+        type:
+          type: integer
+          format: int32
+          enum:
+            - 1
+          example: 1
+          description: "The workflow type. Value 1 represents financial support."
+        active:
+          type: boolean
+          example: true
+          description: "Indicates whether the program is published."
+        publication_status:
+          type: string
+          enum:
+            - published
+          example: "published"
+          description: "The public publication status of the program."
+        start:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-01-01T00:00:00+01:00"
+          description: "The date and time the program starts."
+        end:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-12-31T23:59:59+01:00"
+          description: "The date and time the program ends."
+        is_open:
+          type: boolean
+          example: true
+          description: "Indicates whether the program is currently open."
+    FinancialSupportProgramFinanceSettings:
+      type: object
+      required:
+        - multiple_budgets
+        - budget
+        - budgets
+        - max_apply_sum
+        - max_apply_org_sum
+        - max_applications
+      properties:
+        multiple_budgets:
+          type: boolean
+          example: false
+          description: "Indicates whether the program uses multiple budgets."
+        budget:
+          type: number
+          format: double
+          nullable: true
+          example: 100000.0
+          description: "The total program budget."
+        budgets:
+          type: array
+          description: "The individual budgets when multiple budgets are enabled."
+          items:
+            $ref: "#/components/schemas/FinancialSupportProgramBudget"
+        max_apply_sum:
+          type: number
+          format: double
+          nullable: true
+          example: 5000.0
+          description: "The maximum amount for one application."
+        max_apply_org_sum:
+          type: number
+          format: double
+          nullable: true
+          example: 10000.0
+          description: "The maximum total application amount per organization."
+        max_applications:
+          type: integer
+          format: int32
+          nullable: true
+          example: 2
+          description: "The maximum number of applications per organization."
+    FinancialSupportProgramBudget:
+      type: object
+      required:
+        - name
+        - amount
+      properties:
+        name:
+          type: string
+          nullable: true
+          example: "Youth sports"
+          description: "The name of the individual budget."
+        amount:
+          type: number
+          format: double
+          nullable: true
+          example: 50000.0
+          description: "The amount of the individual budget."
+    FinancialSupportProgramInformation:
+      type: object
+      required:
+        - html
+      properties:
+        html:
+          type: string
+          nullable: true
+          example: '<p>Further information about the <strong>financial support program</strong>.</p>'
+          description: >-
+            The formatted information text. The value can contain HTML markup
+            and links.
+    FinancialSupportProgramLinks:
+      type: object
+      required:
+        - self
+        - application
+      properties:
+        self:
+          type: string
+          format: uri
+          example: >-
+            https://testapi.it4sport.de/webinar/api/official/financial-support-programs/7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: "The absolute URL of this program's detail endpoint."
+        application:
+          type: string
+          format: uri
+          example: >-
+            https://example.org/financial-support/application/deeplink?uWorkflow=7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: >-
+            The deeplink to start an application for this program. Visitors who
+            are not logged in are sent through the portal login and land directly
+            in the preselected application afterwards.
+    PaginationLinks:
+      type: object
+      properties:
+        first:
+          type: string
+          format: uri
+          nullable: true
+          example: >-
+            https://testapi.it4sport.de/webinar/api/official/financial-support-programs?page=1
+        last:
+          type: string
+          format: uri
+          nullable: true
+          example: >-
+            https://testapi.it4sport.de/webinar/api/official/financial-support-programs?page=3
+        prev:
+          type: string
+          format: uri
+          nullable: true
+          example: null
+        next:
+          type: string
+          format: uri
+          nullable: true
+          example: >-
+            https://testapi.it4sport.de/webinar/api/official/financial-support-programs?page=2
+    Pagination:
+      type: object
+      required:
+        - current_page
+        - total_pages
+        - total
+        - per_page
+      properties:
+        current_page:
+          type: integer
+          format: int32
+          example: 1
+        total_pages:
+          type: integer
+          format: int32
+          example: 3
+        total:
+          type: integer
+          format: int32
+          example: 56
+        per_page:
+          type: integer
+          format: int32
+          example: 24
+    Meta:
+      type: object
+      required:
+        - pagination
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    FinancialSupportProgramApiResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FinancialSupportProgramModel"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    FinancialSupportProgramDetailApiResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/FinancialSupportProgramModel"
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The given data was invalid."
+        errors:
+          type: object
+          description: "A list of all validation errors produced."
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              example: "The selected filter.status is invalid."
