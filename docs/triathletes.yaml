@@ -1,0 +1,724 @@
+openapi: 3.0.0
+info:
+  description: 'This is a simple description for the PhoenixII Triathletes-API. It is used by the German Triathlon Union (DTU) and its state associations to search for triathletes, to request daily licenses (Tageslizenzen) for an event and to check the status of a daily license. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.'
+  version: 1.0.0
+  title: Triathletes API
+  contact:
+    email: phoenix-api@it4sport.de
+tags:
+  - name: triathletes
+    description: search triathletes and manage daily licenses.
+paths:
+  /triathletes/search:
+    get:
+      tags:
+        - triathletes
+      summary: Search for a triathlete
+      description: |
+        With this API call you will get all triathletes for your search. The search runs across all triathlon
+        associations and returns one entry per person. Every entry contains the persons licenses (Startpässe)
+        and daily licenses (Tageslizenzen).
+
+        A person is searched by `filter[firstname]`, `filter[lastname]` and `filter[birthdate]`. Alternatively a
+        single person can be requested by `filter[id]`.
+
+        __Note:__ If `filter[club]` is set, only licenses (Startpässe) are searched. Daily licenses are not
+        returned in this case.
+      operationId: searchTriathletes
+      parameters:
+        - name: 'filter[id]'
+          in: query
+          description: 'Filter by the unique ID of the person, of a license (Startpass) or of a daily license. __If this filter exists in the request, `filter[firstname]`, `filter[lastname]` and `filter[birthdate]` are not required and will be ignored.__<br>Value must follow pattern: (^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)'
+          required: false
+          schema:
+            type: string
+            format: uuid
+            pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+            example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+        - name: 'filter[firstname]'
+          in: query
+          description: Filter triathletes by the firstname (partial match, at least 2 characters, letters only). Required unless `filter[id]` is set.
+          required: false
+          schema:
+            type: string
+            minLength: 2
+            example: Erika
+        - name: 'filter[lastname]'
+          in: query
+          description: Filter triathletes by the lastname (partial match, at least 2 characters, letters only). Required unless `filter[id]` is set.
+          required: false
+          schema:
+            type: string
+            minLength: 2
+            example: Mustermann
+        - name: 'filter[birthdate]'
+          in: query
+          description: Filter triathletes by the birthdate (exact match, must be in the past). Required unless `filter[id]` is set.
+          required: false
+          example: '2001-01-12'
+          schema:
+            type: string
+            format: date
+            pattern: '^((?:19|20)\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
+        - name: 'filter[gender]'
+          in: query
+          description: 'Filter triathletes by the gender. __Note:__ `divers` is accepted, but is currently evaluated like `male`.'
+          required: false
+          schema:
+            type: string
+            enum:
+              - male
+              - female
+              - divers
+        - name: 'filter[club]'
+          in: query
+          description: 'Filter licenses (Startpässe) by the club. The value is either the unique club ID (UUID) or the club number. If the club does not exist, the API responds with 404. If this filter is set, daily licenses are not part of the result.'
+          required: false
+          schema:
+            type: string
+            example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+        - name: 'filter[event]'
+          in: query
+          description: 'Filter daily licenses by the event. The value is either the unique event ID (UUID) or the event number (`EventID`). Licenses (Startpässe) are not affected by this filter. If the event number is unknown, no daily licenses are returned.'
+          required: false
+          schema:
+            type: string
+            example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized (missing or invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'No triathletes found for the given filters, or the club of `filter[club]` was not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+              examples:
+                noAthletes:
+                  summary: No triathletes found
+                  value:
+                    code: 404
+                    message: No athletes found.
+                clubNotFound:
+                  summary: Club not found
+                  value:
+                    code: 404
+                    message: The club was not found.
+        '422':
+          description: Invalid Request (validation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '429':
+          description: Too Many Requests (daily limit of the API key reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - api_key: []
+  /triathletes/status:
+    get:
+      tags:
+        - triathletes
+      summary: Check the status of a daily license
+      description: |
+        With this API call you can check the status of a daily license. Use the `uID` returned by
+        `/triathletes/license-request` as `filter[id]`.
+
+        A valid daily license is reported as `approved`, an invalid one as `rejected`. The details of the
+        triathlete (`athlete_license`) are only part of the response if the daily license is `approved`.
+      operationId: statusForDailyLicense
+      parameters:
+        - name: 'filter[id]'
+          in: query
+          description: The unique ID of the daily license (returned as `uID` by the license request)
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyLicenseStatus'
+        '401':
+          description: Unauthorized (missing or invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The daily license was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+              example:
+                code: 404
+                message: The daily license was not found.
+        '422':
+          description: Invalid Request (validation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '429':
+          description: Too Many Requests (daily limit of the API key reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - api_key: []
+  /triathletes/license-request:
+    post:
+      tags:
+        - triathletes
+      summary: Request a daily license for an event
+      description: |
+        With this API call you can create a daily license (Tageslizenz) for a triathlete and an event.
+
+        The triathlete is identified by `firstname`, `lastname`, `gender` and `birthdate`. If no `birthdate` is
+        given, the `email` is used instead. If more than one person matches, the result is narrowed down by
+        `email`, `postal`, `city` and `street` (only the fields that are part of the request are used).
+        If no person matches, a new person is created with the given data. Address and contact data are
+        optional and are only stored if they are part of the request.
+
+        Every person can hold only one daily license per event. The daily license is valid from `license_from`
+        (default: today) and gets a number from the number range "Tageslizenzen".
+      operationId: requestDailyLicense
+      requestBody:
+        required: true
+        description: This is the body of the request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DailyLicenseRequest'
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyLicenseCreated'
+        '400':
+          description: The triathlete already has a daily license for this event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+              example:
+                code: 400
+                message: The athlete already has a daily license for this event.
+        '401':
+          description: Unauthorized (missing or invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The event was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+              example:
+                code: 404
+                message: The event was not found.
+        '422':
+          description: Invalid Request (validation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '429':
+          description: Too Many Requests (daily limit of the API key reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - api_key: []
+servers:
+  - url: 'https://{env}api.it4sport.de/{client}/api/'
+    variables:
+      env:
+        description: This is the environment you will call the API
+        default: test
+        enum:
+          - test
+          - testing
+          - dev
+      client:
+        description: This is the client you will call the API
+        default: dtu
+  - url: 'https://{env}{client}.it4sport.de/api/'
+    variables:
+      env:
+        description: This is the environment you will call the API
+        default: test
+        enum:
+          - test
+          - testing
+          - dev
+      client:
+        description: This is the client you will call the API
+        default: dtu
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-Auth-Token
+      in: header
+  schemas:
+    DailyLicenseRequest:
+      type: object
+      required:
+        - event_id
+        - firstname
+        - lastname
+        - gender
+      properties:
+        event_id:
+          type: string
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The event the daily license is requested for. Either the unique event ID (UUID) or the event number (`EventID`).
+        firstname:
+          type: string
+          minLength: 2
+          example: Erika
+          description: The triathletes firstname (letters only)
+        lastname:
+          type: string
+          minLength: 2
+          example: Mustermann
+          description: The triathletes lastname (letters only)
+        birthdate:
+          type: string
+          format: date
+          example: '2001-01-12'
+          description: The triathletes birthdate (must be in the past). __Required if `email` is not given.__
+        email:
+          type: string
+          format: email
+          example: abc@example.org
+          description: The triathletes email. __Required if `birthdate` is not given.__ The email is also stored at the daily license.
+        gender:
+          type: string
+          example: F
+          enum:
+            - M
+            - F
+            - D
+            - male
+            - female
+            - divers
+          description: The triathletes gender. Both the short form (M/F/D) and the long form (male/female/divers) are accepted.
+        license_from:
+          type: string
+          format: date
+          example: '2026-06-01'
+          description: The date the daily license is valid from. Defaults to today.
+        street:
+          type: string
+          minLength: 3
+          example: Am Ring 99
+          description: The triathletes street (optional, only stored for new persons)
+        postal:
+          type: string
+          minLength: 3
+          example: '12345'
+          description: The triathletes postal code (optional, only stored for new persons)
+        city:
+          type: string
+          minLength: 3
+          example: Musterstadt
+          description: The triathletes city (optional, only stored for new persons)
+        country:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: GER
+          description: The triathletes country as IOC country code (optional, only stored for new persons)
+        first_nationality:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: GER
+          description: The triathletes first nationality as IOC country code. Currently only validated, not stored.
+        phone:
+          type: string
+          example: 01234 56789
+          description: The triathletes phone number (optional, only stored for new persons)
+        mobile:
+          type: string
+          example: 01234 56789
+          description: The triathletes mobile number (optional, only stored for new persons)
+    DailyLicenseCreated:
+      type: object
+      properties:
+        uID:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the created daily license. Use it as `filter[id]` for `/triathletes/status`.
+        code:
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          example: Die Tageslizenz wurde erfolgreich erstellt.
+    DailyLicenseStatus:
+      type: object
+      required:
+        - license_status
+      properties:
+        license_status:
+          $ref: '#/components/schemas/LicenseStatus'
+        athlete_license:
+          $ref: '#/components/schemas/AthleteLicense'
+    LicenseStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the daily license
+        status_type:
+          type: string
+          example: approved
+          enum:
+            - approved
+            - rejected
+          description: '`approved` if the daily license is valid, `rejected` if it is invalid'
+    AthleteLicense:
+      type: object
+      description: Details of the triathlete and the daily license. Only part of the response if the status is `approved`.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the person
+        firstname:
+          type: string
+          example: Erika
+        lastname:
+          type: string
+          example: Mustermann
+        street:
+          type: string
+          example: Am Ring 99
+          description: Empty string if the person has no address
+        postal:
+          type: string
+          example: '12345'
+          description: Empty string if the person has no address
+        city:
+          type: string
+          example: Musterstadt
+          description: Empty string if the person has no address
+        country:
+          type: string
+          example: GER
+          description: IOC country code of the address. Empty string if the person has no address
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: '2001-01-12'
+        gender:
+          type: string
+          example: F
+          enum:
+            - M
+            - F
+        phone:
+          type: string
+          example: 01234 56789
+          description: Empty string if not available
+        mobile:
+          type: string
+          example: 01234 56789
+          description: Empty string if not available
+        email:
+          type: string
+          example: abc@example.org
+          description: The email stored at the daily license, otherwise the persons standard email
+        first_nationality:
+          type: string
+          nullable: true
+          example: GER
+          description: IOC country code of the persons first nationality
+        nationality_date:
+          type: string
+          format: date
+          nullable: true
+          example: '2001-01-12'
+          description: Currently mirrors the birthdate
+        license_from:
+          type: string
+          format: date
+          example: '2026-06-01'
+          description: The date the daily license is valid from
+        license_number:
+          type: string
+          example: '10023'
+          description: The number of the daily license
+        uEvent:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the event
+        event_id:
+          type: string
+          nullable: true
+          example: '2026-0815'
+          description: The event number (`EventID`) of the event
+    Triathlete:
+      type: object
+      properties:
+        uID:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the person
+        firstname:
+          type: string
+          example: Erika
+          description: The triathletes firstname
+        lastname:
+          type: string
+          example: Mustermann
+          description: The triathletes lastname
+        gender:
+          type: string
+          enum:
+            - M
+            - F
+          example: F
+          description: The triathletes gender
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: '2001-01-12'
+          description: The triathletes birthdate
+        first_nationality:
+          type: string
+          nullable: true
+          example: GER
+          description: IOC country code of the triathletes first nationality
+        is_active:
+          type: boolean
+          example: true
+          description: '`true` if the triathlete has a current license (Startpass) or a valid daily license'
+        club:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Club'
+          description: The club of the first license (Startpass). `null` if the triathlete has no license.
+        license:
+          type: array
+          description: The licenses (Startpässe) of the triathlete
+          items:
+            $ref: '#/components/schemas/License'
+        daily_licenses:
+          type: array
+          description: The daily licenses (Tageslizenzen) of the triathlete
+          items:
+            $ref: '#/components/schemas/DailyLicense'
+    Club:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The clubs unique identifier
+        number:
+          type: integer
+          format: int32
+          example: 12345
+          description: The clubs number (must not be unique across associations)
+        club_number:
+          type: string
+          example: BWTV0012345
+          description: The clubs number prefixed with the short name of the association
+        name:
+          type: string
+          example: TSV Musterhausen
+          description: The clubs name
+        short_name:
+          type: string
+          nullable: true
+          example: TSV MH
+          description: The clubs short name
+        city:
+          type: string
+          nullable: true
+          example: Musterhausen
+          description: The city location of the club
+        postal:
+          type: string
+          nullable: true
+          example: '74379'
+          description: The postal code of the club
+    License:
+      type: object
+      description: A license (Startpass) of the triathlete
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the license
+        license_number:
+          type: string
+          example: BWTV0001234
+          description: The license number prefixed with the short name of the association
+        license_club:
+          type: string
+          nullable: true
+          example: BWTV0012345
+          description: The club number of the club the license is issued for
+        home_club:
+          type: string
+          nullable: true
+          example: BWTV0012345
+          description: The club number of the triathletes home club
+        license_start:
+          type: string
+          format: date
+          nullable: true
+          example: '2020-01-01'
+        license_end:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-12-31'
+          description: '`null` if the license is not terminated'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-01-01T00:00:00+01:00'
+    DailyLicense:
+      type: object
+      description: A daily license (Tageslizenz) of the triathlete
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the daily license
+        license_number:
+          type: string
+          example: '10023'
+          description: The number of the daily license
+        license_date:
+          type: string
+          format: date
+          example: '2026-06-01'
+          description: The date the daily license is valid from
+        uEvent:
+          type: string
+          format: uuid
+          example: 7d342a44-7b0c-42d3-8900-13dd624eae88
+          description: The unique ID of the event
+        EventID:
+          type: string
+          nullable: true
+          example: '2026-0815'
+          description: The event number of the event
+        status:
+          type: string
+          enum:
+            - valid
+            - invalid
+          example: valid
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-05-20T10:15:00+02:00'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-05-20T10:15:00+02:00'
+    Meta:
+      type: object
+      properties:
+        results:
+          type: integer
+          example: 1
+          description: Number of triathletes in `data`
+        dev:
+          type: object
+          nullable: true
+          description: Debug information, only filled on development systems
+    ApiResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Triathlete'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    NotFoundResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+          example: No athletes found.
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            filter.birthdate:
+              - The filter.birthdate field is required.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 401
+        type:
+          type: string
+          example: Unauthorized Exception
+        message:
+          type: string
+          example: 401 Unauthorized (PNX)
