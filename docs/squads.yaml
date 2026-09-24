@@ -48,6 +48,11 @@ paths:
             type: string
             format: uuid
         - in: "query"
+          name: "per_page"
+          description: how many Squads per page
+          schema:
+            type: integer
+        - in: "query"
           name: saison
           required: false
           description: filter for season
@@ -83,6 +88,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: "query"
+          name: "per_page"
+          description: how many Squads per page
+          schema:
+            type: integer
         - name: X-Auth-Token
           in: query
           required: true
