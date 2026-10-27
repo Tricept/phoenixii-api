@@ -594,6 +594,22 @@ paths:
           description: failed
       security:
         - api_key: []
+  /courses/course-types:
+    get:
+      tags:
+        - CourseType
+      summary: get a list of all CourseTypes
+      description: "With this API call you can get a list of all course types of your client. Only course types that are marked to be shown on the internet are returned. The list is sorted by name and confirmation label."
+      operationId: indexCourseType
+      responses:
+        "200":
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseTypeApiResponse"
+      security:
+        - api_key: []
 servers:
   - url: 'https://{env}api.it4sport.de/{client}/api/'
     variables:
@@ -1144,6 +1160,68 @@ components:
             $ref: "#/components/schemas/CourseCosts"
         meta:
           $ref: "#/components/schemas/Meta"
+    CourseType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7F846C79-4CB5-4A1E-986C-3EEBDFE7A5BE"
+          description: "The course types unique identifier"
+        number:
+          type: integer
+          format: int32
+          example: 218
+          description: "The number of the course type"
+        name:
+          type: string
+          example: "Kursleiterausbildung"
+          description: "The name of the course type"
+        short_name:
+          type: string
+          nullable: true
+          example: null
+          description: "The short name of the course type"
+        short_name_alt:
+          type: string
+          nullable: true
+          example: null
+          description: "An alternative short name of the course type"
+        sort:
+          type: string
+          nullable: true
+          example: null
+          description: "The sort value of the course type"
+        confirmation_label:
+          type: string
+          nullable: true
+          example: "Kursleiterausbildung"
+          description: "The label of the course type used for course confirmations"
+        with_examination:
+          type: boolean
+          example: false
+          description: "Courses of this type end with an examination"
+        with_training:
+          type: boolean
+          example: false
+          description: "Courses of this type are further training courses"
+        show_on_internet:
+          type: boolean
+          example: true
+          description: "The course type is shown on the internet"
+    CourseTypeApiResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseType"
+        meta:
+          type: object
+          properties:
+            results:
+              type: integer
+              example: 1
     ErrorResponse:
       type: object
       properties:
