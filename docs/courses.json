@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "description": "This is a simple description for the PhoenixII Courses-API. The parameters {env} and {client} in the URL are needed. They represent the right environment and client for the API. These parameter will be given with API key.",
-    "version": "1.3.4",
+    "version": "1.4.0",
     "title": "Courses API",
     "contact": {
       "email": "phoenix-api@it4sport.de"
@@ -27,7 +27,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Use to limit the amount of courses. Default: 25 | Max: 1000",
+            "description": "Use to limit the amount of courses. Default: 24 | Max: 200",
             "required": false,
             "schema": {
               "type": "integer",
@@ -66,7 +66,7 @@
           {
             "name": "filter[SeminarNr]",
             "in": "query",
-            "description": "Filter by course number.",
+            "description": "Filter by a part of the course number.",
             "required": false,
             "schema": {
               "type": "string"
@@ -75,7 +75,7 @@
           {
             "name": "filter[SeminarBeschreibung]",
             "in": "query",
-            "description": "Filter by a part of the course description.",
+            "description": "Filter by a part of the course description, the course number or the internal course number (SemNr).",
             "required": false,
             "schema": {
               "type": "string"
@@ -112,6 +112,142 @@
                 3,
                 4
               ]
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "in": "query",
+            "description": "Include archived courses. Without this filter only courses that are not archived are returned. Allowed values:\n- include: active and archived courses\n- only: only archived courses\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "include",
+                "only"
+              ]
+            }
+          },
+          {
+            "name": "filter[starts_after]",
+            "in": "query",
+            "description": "Only courses that start at or after this date. A date without time is read as 00:00 (start of the day).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2024-01-01"
+            }
+          },
+          {
+            "name": "filter[starts_before]",
+            "in": "query",
+            "description": "Only courses that start at or before this date. A date without time is read as 00:00 (start of the day), so use e.g. 2024-12-31T23:59:59 to include the whole day.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2024-12-31T23:59:59"
+            }
+          },
+          {
+            "name": "filter[ends_after]",
+            "in": "query",
+            "description": "Only courses that end at or after this date. A date without time is read as 00:00 (start of the day).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2024-01-01"
+            }
+          },
+          {
+            "name": "filter[ends_before]",
+            "in": "query",
+            "description": "Only courses that end at or before this date. A date without time is read as 00:00 (start of the day), so use e.g. 2024-12-31T23:59:59 to include the whole day.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2024-12-31T23:59:59"
+            }
+          },
+          {
+            "name": "filter[id]",
+            "in": "query",
+            "description": "Filter by the unique identifier of a course.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[course_type]",
+            "in": "query",
+            "description": "Comma separated list of course types. Use the course type number or its short name (see /courses/course-types).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[course_focus]",
+            "in": "query",
+            "description": "Comma separated list of course focuses. Use the focus number, its unique identifier or its short name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[FbSchwerpunktNr]",
+            "in": "query",
+            "description": "Filter by course focus number. Matches every number that contains the value (e.g. 3 also matches 13), use filter[course_focus] for an exact match.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[license_type]",
+            "in": "query",
+            "description": "Comma separated list of license types the course qualifies for. Use the license type number, its unique identifier or its short name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[sports_offers]",
+            "in": "query",
+            "description": "Filter by discipline. Use the discipline number or its short name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[county]",
+            "in": "query",
+            "description": "Comma separated list of counties. Use the county number or its unique identifier.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[sub_county]",
+            "in": "query",
+            "description": "Comma separated list of unique identifiers of subcounties.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[uCourseForms]",
+            "in": "query",
+            "description": "Filter by the unique identifier of a course form.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -1009,6 +1145,17 @@
             "type": "string",
             "format": "date-time",
             "example": "2019-12-24T00:00:00+01:00"
+          },
+          "archived": {
+            "type": "boolean",
+            "example": false,
+            "description": "True if the course was moved to a course archive. Archived courses are only returned with filter[archived]."
+          },
+          "totalLE": {
+            "type": "string",
+            "nullable": true,
+            "example": "16",
+            "description": "The total learning units of the course. Sub-courses only take this value over when they are created."
           }
         },
         "allOf": [
